@@ -277,9 +277,9 @@ function preview(c,pos){if(!layerB)return;const tok=++pvTok;
     const len=m.reduce((s,q,k)=>k?s+Math.hypot(q[0]-m[k-1][0],q[1]-m[k-1][1]):0,0)+128;pl.style.strokeDasharray=len;pl.style.strokeDashoffset=len;pl.getBoundingClientRect();
     pl.style.transition=`stroke-dashoffset .42s cubic-bezier(.4,.1,.3,1) ${CH[c].i[pos].indexOf(i)*60}ms`;pl.style.strokeDashoffset=0});
   setTimeout(()=>{if(tok!==pvTok)return;els.forEach(e=>e.classList.remove('hideW'));ink.remove()},620)}
-function go(c,pos){preview(null);cur=c;history.push(c);pulled.clear();pin=pos!=null?{level:'part',part:pos}:{level:'char'};hov=null;buildGlyph();if(pos!=null)CH[c].i[pos].forEach(i=>strokeEls[i].classList.add('flash'));renderAll()}
+function go(c,pos){preview(null);cur=c;history.push(c);pulled.clear();pin=pos!=null?{level:'part',part:pos}:{level:'char'};hov=null;buildGlyph();if(pos!=null)CH[c].i[pos].forEach(i=>strokeEls[i].classList.add('flash'));renderAll();retarget(pos)}
 async function write(idx){
-  if(writing)return;writing=true;closeMenu();const layer=el('g');layerA.append(layer);idx.forEach(i=>strokeEls[i].style.opacity=0);
+  if(writing)return;writing=true;const layer=el('g');layerA.append(layer);idx.forEach(i=>strokeEls[i].style.opacity=0);
   for(const i of idx){const cp=el('clipPath',{id:'cp'+i});cp.append(el('path',{d:CH[cur].s[i]}));layer.append(cp);
     const m=CH[cur].m[i],[x,y]=offset(cur,i);const pl=el('polyline',{class:'anim','clip-path':`url(#cp${i})`,points:m.map(([a,b])=>`${a},${b}`).join(' ')});
     const len=m.reduce((s,p,k)=>k?s+Math.hypot(p[0]-m[k-1][0],p[1]-m[k-1][1]):0,0)+128;const w=el('g',{transform:`translate(${x},${y})`});w.append(pl);layer.append(w);
@@ -315,7 +315,7 @@ function renderHero(f){
   setTimeout(()=>{a.querySelectorAll('button').forEach((b,i)=>ink([b],600+i*70,0))},0);ink(splitInk(a.querySelector('.k')||document.createElement('i')),520,14);
   also.forEach(([c,k])=>{const b=document.createElement('button');b.type='button';b.textContent=c;
     const pos=CH[c].k.indexOf(k)===0?1:0;b.onmouseenter=()=>preview(c,pos);b.onmouseleave=()=>preview(null);
-    b.onclick=e=>{e.stopPropagation();closeMenu(true);go(c,null)};a.append(b)});
+    b.onclick=e=>{e.stopPropagation();go(c,null)};a.append(b)});
 }
 /* pinyin in four lines, read aloud */
 function renderPinyin(){const p=CH[cur].inf[0];
@@ -329,7 +329,7 @@ function renderOrder(){const d=CH[cur],o=$('order');o.innerHTML='';
   d.s.forEach((_,k)=>{const b=document.createElement('button');b.type='button';b.setAttribute('aria-label',`Stroke ${k+1}: ${d.n[k]}`);
     b.innerHTML=`<svg viewBox="0 0 1024 1024"><rect class="bx" x="7" y="7" width="1010" height="1010"/><line class="cr" x1="512" y1="0" x2="512" y2="1024"/><line class="cr" x1="0" y1="512" x2="1024" y2="512"/><g transform="scale(.84) translate(98,98) scale(1,-1) translate(0,-900)">${d.s.slice(0,k+1).map((p,i)=>`<path d="${p}" class="${i===k?'cur':''}"/>`).join('')}</g></svg>`;
     b.onmouseenter=()=>{if(menu)return;hov={level:'stroke',stroke:k};paint()};b.onmouseleave=()=>{if(menu)return;hov=null;paint()};
-    b.onclick=e=>{e.stopPropagation();closeMenu(true);pin={level:'stroke',stroke:k};hov=null;paint()};o.append(b)})}
+    b.onclick=e=>{e.stopPropagation();pin={level:'stroke',stroke:k};hov=null;paint();retarget()};o.append(b)})}
 const cap1=s=>s?s[0].toUpperCase()+s.slice(1):'';
 const ordinal=n=>n+(['th','st','nd','rd'][(n%100>10&&n%100<14)?0:Math.min(n%10,4)%4]||'th');
 function renderAll(){
@@ -337,14 +337,14 @@ function renderAll(){
   renderPinyin();renderOrder();
   const nav=$('nav');nav.innerHTML='';
   DATA.start.forEach(c=>{const b=document.createElement('button');b.type='button';b.textContent=c;b.setAttribute('aria-current',c===history[0]);
-    b.onclick=e=>{e.stopPropagation();if(c===cur&&history.length===1)return;closeMenu();history=[c];cur=c;pulled.clear();pin={level:'char'};hov=null;buildGlyph();renderAll()};nav.append(b)});
+    b.onclick=e=>{e.stopPropagation();if(c===cur&&history.length===1)return;history=[c];cur=c;pulled.clear();pin={level:'char'};hov=null;buildGlyph();renderAll();retarget()};nav.append(b)});
   const tr=$('trail');tr.innerHTML='';
   if(history.length>1){const bk=document.createElement('button');bk.type='button';bk.className='bk';bk.textContent='← Back';bk.onclick=e=>{e.stopPropagation();back()};tr.append(bk);
     history.forEach((c,i)=>{if(i){const s=document.createElement('span');s.textContent='→';tr.append(s)}
       if(i===history.length-1){const s=document.createElement('span');s.className='now';s.textContent=c;tr.append(s)}
-      else{const b=document.createElement('button');b.type='button';b.className='c';b.textContent=c;b.onclick=e=>{e.stopPropagation();history=history.slice(0,i+1);cur=c;pulled.clear();pin={level:'char'};hov=null;closeMenu();buildGlyph();renderAll()};tr.append(b)}})}
+      else{const b=document.createElement('button');b.type='button';b.className='c';b.textContent=c;b.onclick=e=>{e.stopPropagation();history=history.slice(0,i+1);cur=c;pulled.clear();pin={level:'char'};hov=null;buildGlyph();renderAll();retarget()};tr.append(b)}})}
   paint()}
-function back(){if(history.length<2)return;history.pop();cur=history[history.length-1];pulled.clear();pin={level:'char'};hov=null;closeMenu();buildGlyph();renderAll()}
+function back(){if(history.length<2)return;history.pop();cur=history[history.length-1];pulled.clear();pin={level:'char'};hov=null;buildGlyph();renderAll();retarget()}
 
 /* ================= menu ================= */
 function mini(c,on){const d=CH[c];let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;for(const m of d.m)for(const[x,y]of m){x0=Math.min(x0,x);x1=Math.max(x1,x);y0=Math.min(y0,y);y1=Math.max(y1,y)}
@@ -405,16 +405,22 @@ function stagger(p,cls,rev){const kids=[...p.children];kids.forEach((k,i)=>k.sty
   p.classList.remove('wr','wl','er','el');void p.offsetWidth;p.classList.add(cls);
   if(cls[0]==='w'){let end=0;kids.forEach((k,i)=>{const chs=splitInk(k.querySelector('.label')||k);end=Math.max(end,ink(chs,i*60+120,14))});return end}
   return 300+kids.length*22}
-function openMenu(){closeMenu(true);hov=null;menu=document.createElement('div');menu.className='menu';menu.setAttribute('role','menu');
+function openMenu(){closeMenu(true);hov=null;lastKey=cur+JSON.stringify(pin);gen++;menu=document.createElement('div');menu.className='menu';menu.setAttribute('role','menu');
   const t=$('trigger');stack=[page(itemsFor(pin))];menu.append(stack[0]);t.after(menu);$('col').classList.add('open');wire(menu);sync();stagger(stack[0],'wr');
   t.setAttribute('aria-expanded','true');paint()}
-function reopen(){if(menu)openMenu()}
-let busy=false;
-function push(sub){if(busy)return;busy=true;const m=menu,old=stack[stack.length-1],p=page(sub.items(),sub);const t=stagger(old,'er');
-  setTimeout(()=>{busy=false;if(menu!==m)return;old.hidden=true;menu.append(p);stack.push(p);stagger(p,'wr')},t)}
-function pop(){if(stack.length<2||busy)return;busy=true;const m=menu,top=stack.pop();preview(null);const t=stagger(top,'el',true);
-  setTimeout(()=>{busy=false;top.remove();if(menu!==m)return;const p=stack[stack.length-1];p.hidden=false;stagger(p,'wl')},t)}
-function closeMenu(silent){const m=menu,top=stack[stack.length-1];menu=null;stack=[];busy=false;$('trigger').setAttribute('aria-expanded','false');
+function reopen(){retarget()}
+let busy=false,gen=0,lastKey='';
+/* the menu stays open and follows the focus: rebuild its rows for whatever you are now looking at */
+function retarget(swapPos){if(!menu)return;
+  const key=cur+JSON.stringify(pin)+(swapPos??'');if(key===lastKey&&swapPos==null)return;lastKey=key;
+  gen++;busy=false;stack.forEach(p=>p.remove());const root=page(itemsFor(pin));stack=[root];menu.append(root);sync();
+  if(swapPos!=null){const it=swapItem(swapPos,'S');if(!it.disabled){root.hidden=true;const sp=page(it.sub.items(),it.sub);menu.append(sp);stack.push(sp);stagger(sp,'wr');paint();return}}
+  stagger(root,'wr');paint()}
+function push(sub){if(busy)return;busy=true;const m=menu,g=gen,old=stack[stack.length-1],p=page(sub.items(),sub);const t=stagger(old,'er');
+  setTimeout(()=>{if(g!==gen)return;busy=false;if(menu!==m)return;old.hidden=true;menu.append(p);stack.push(p);stagger(p,'wr')},t)}
+function pop(){if(stack.length<2||busy)return;busy=true;const m=menu,g=gen,top=stack.pop();preview(null);const t=stagger(top,'el',true);
+  setTimeout(()=>{if(g!==gen)return;busy=false;top.remove();if(menu!==m)return;const p=stack[stack.length-1];p.hidden=false;stagger(p,'wl')},t)}
+function closeMenu(silent){gen++;const m=menu,top=stack[stack.length-1];menu=null;stack=[];busy=false;$('trigger').setAttribute('aria-expanded','false');
   if(!m){$('col').classList.remove('open');return}
   if(silent){m.remove();$('col').classList.remove('open');return}
   preview(null);const t=stagger(top,'el',true);setTimeout(()=>{m.remove();if(!menu){$('col').classList.remove('open');paint()}},t)}
@@ -427,8 +433,8 @@ function wire(m){
   m.addEventListener('click',e=>e.stopPropagation())}
 function act(b){const it=b._it;if(it.disabled)return;
   if(it.sub){push(it.sub);return}
-  if(it.alt){closeMenu(true);go(it.alt,it.pos);return}
-  if(it.act){it.act();sync();if(it.icon==='write'||it.icon==='up')closeMenu()}}
+  if(it.alt){go(it.alt,it.pos);return}
+  if(it.act){it.act();sync();if(it.icon==='up')retarget()}}
 
 /* ================= pointing at the character ================= */
 function strokeAt(e){const s=e.target.closest('.st');return s&&layerA.contains(s)?+s.dataset.i:-1}
@@ -436,15 +442,15 @@ glyph.addEventListener('pointermove',e=>{if(menu||writing)return;const i=strokeA
   if(i>=0){if(pin.level==='part'&&partOf(cur,i)===pin.part||pin.level==='stroke'&&partOf(cur,i)===partOf(cur,pin.stroke))h={level:'stroke',stroke:i};else h={level:'part',part:partOf(cur,i)}}
   if(JSON.stringify(h)!==JSON.stringify(hov)){hov=h;paint()}});
 glyph.addEventListener('pointerleave',()=>{if(hov){hov=null;paint()}});
-glyph.addEventListener('click',e=>{e.stopPropagation();if(writing)return;closeMenu(true);const i=strokeAt(e);
+glyph.addEventListener('click',e=>{e.stopPropagation();if(writing)return;const i=strokeAt(e);
   if(i<0)pin={level:'char'};
   else if((pin.level==='part'&&partOf(cur,i)===pin.part)||(pin.level==='stroke'&&partOf(cur,i)===partOf(cur,pin.stroke)))pin={level:'stroke',stroke:i};
   else pin={level:'part',part:partOf(cur,i)};
-  hov=null;paint()});
+  hov=null;paint();retarget()});
 $('pin').addEventListener('click',e=>{e.stopPropagation();speak(cur)});
 $('pin').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();speak(cur)}});
 $('trigger').addEventListener('click',e=>{e.stopPropagation();if(menu)closeMenu();else openMenu()});
-document.addEventListener('click',e=>{if(menu&&!e.target.closest('.menu'))closeMenu()});
+document.addEventListener('click',e=>{if(menu&&!e.target.closest('.ipad'))closeMenu()});
 addEventListener('keydown',e=>{
   if(e.key==='Escape'){if(menu&&stack.length>1)pop();else if(menu)closeMenu();else if(pin.level==='stroke'){pin={level:'part',part:partOf(cur,pin.stroke)};paint()}else{pin={level:'char'};paint()}return}
   if(!menu&&e.key==='Backspace'){back();return}
@@ -459,7 +465,7 @@ addEventListener('resize',fit);
 /* ================= spec ================= */
 $('spec').innerHTML=`<div class="tables"><div>
 <h3>Trigger</h3><table><tr><td>Row</td><td>full column · padding 0 0 12 · rule 1 #1C1C1A</td></tr><tr><td>Label</td><td>SF Pro 15 / 500 · target 15 #85837D</td></tr><tr><td>Caret</td><td>13 · open: Close, #C8432C, caret 180°</td></tr></table>
-<h3>Container</h3><table><tr><td>Width</td><td>column (284)</td></tr><tr><td>Fill · shadow</td><td>none · set into the column</td></tr><tr><td>Open</td><td>each rule is drawn left → right (600ms, 60ms apart), then its words soak in letter by letter like ink on paper: blur 5 → 0, #B9B7B1 → ink, 650–1000ms, 14ms apart, slightly uneven</td></tr><tr><td>Close</td><td>rows dry out, last row first · fade and blur 4 · 300ms · 22ms apart</td></tr><tr><td>Submenu</td><td>old rows dry out, new rows are drawn and soak in · back: rules drawn right → left</td></tr><tr><td>Text on the left</td><td>whenever the focus changes, the title, note and related characters soak in the same way, in reading order</td></tr><tr><td>Trigger line</td><td>draws red left → right · 450ms</td></tr></table>
+<h3>Container</h3><table><tr><td>Width</td><td>column (284)</td></tr><tr><td>Fill · shadow</td><td>none · set into the column</td></tr><tr><td>Open</td><td>each rule is drawn left → right (600ms, 60ms apart), then its words soak in letter by letter like ink on paper: blur 5 → 0, #B9B7B1 → ink, 650–1000ms, 14ms apart, slightly uneven</td></tr><tr><td>Lifetime</td><td>stays open while you work: pointing at a part, a stroke or a stroke box re-targets the rows; a swap lands on the next swap; it closes only on Close, Esc, or a tap outside the device</td></tr><tr><td>Close</td><td>rows dry out, last row first · fade and blur 4 · 300ms · 22ms apart</td></tr><tr><td>Submenu</td><td>old rows dry out, new rows are drawn and soak in · back: rules drawn right → left</td></tr><tr><td>Text on the left</td><td>whenever the focus changes, the title, note and related characters soak in the same way, in reading order</td></tr><tr><td>Trigger line</td><td>draws red left → right · 450ms</td></tr></table>
 <h3>Section</h3><table><tr><td>Label</td><td>12.5 · #85837D · sentence case</td></tr><tr><td>Padding</td><td>16 0 6</td></tr></table>
 <h3>Practice sheet</h3><table><tr><td>Pinyin</td><td>four lines 440 × 84 · 50 · tap to hear</td></tr><tr><td>Grid</td><td>tian-zi 440 · dashed cross · #EFCFC7</td></tr><tr><td>Stroke order</td><td>44 boxes · gap 8 · newest stroke #C8432C</td></tr></table>
 </div><div>
