@@ -2289,7 +2289,9 @@ function makePanel(pan,o){let pf=0;
     pan.querySelectorAll('.dg-tiles.pace .pf svg').forEach((svg,k)=>{const h=SFD.attach(svg,sp,1.1);h.w=h.wt=1;h.set(SPD[k])});
     pan.querySelectorAll('.mini svg').forEach(svg=>{const h=SFD.attach(svg,sp,1.1);h.w=h.wt=1});
     pan.querySelectorAll('[data-k]').forEach(el=>{
-      el.addEventListener('mouseenter',e=>{const r=el.getBoundingClientRect();el.style.setProperty('--x',(e.clientX-r.left)+'px');el.style.setProperty('--y',(e.clientY-r.top)+'px');const i=nav().indexOf(el);if(i>=0)fo(i)});
+      const hv=e=>{if(el.classList.contains('on'))return;if(e.type==='pointermove'&&!e.movementX&&!e.movementY)return;if(performance.now()-lastScroll<260)return;
+        const r=el.getBoundingClientRect();el.style.setProperty('--x',(e.clientX-r.left)+'px');el.style.setProperty('--y',(e.clientY-r.top)+'px');const i=nav().indexOf(el);if(i>=0)fo(i,'hover')};
+      el.addEventListener('mouseenter',hv);el.addEventListener('pointermove',hv);
       el.addEventListener('pointerdown',()=>el.classList.add('pr'));['pointerup','pointerleave'].forEach(t=>el.addEventListener(t,()=>el.classList.remove('pr')));
       el.addEventListener('click',e=>{e.stopPropagation();act(el)})});
     pan.querySelectorAll('.dg-adj .pm').forEach(b=>b.addEventListener('click',e=>{e.stopPropagation();const a=b.closest('.dg-adj');foEl(a);adj(a.dataset.goal,+b.dataset.d)}));pf=0;fo(1)}
@@ -2304,8 +2306,9 @@ function makePanel(pan,o){let pf=0;
       const mid={x:u.x+(t.x-u.x)*.25,y:u.y+(t.y-u.y)*.25,w:u.w-(u.w-t.w)*.25,h:u.h-(u.h-t.h)*.25,rad:t.rad};
       ind.animate([K(last),K(mid),K(t)],{duration:460,easing:'cubic-bezier(.3,.9,.3,1)'})}
     Object.assign(ind.style,K(t));last=t}
-  function fo(i){const n=nav(),prev=pan.querySelector('[data-k].on');pf=Math.max(0,Math.min(n.length-1,i));pan.querySelectorAll('[data-k]').forEach(el=>el.classList.toggle('on',el===n[pf]));
-    if(o.exitOut&&prev&&prev!==n[pf]){prev.classList.add('out');clearTimeout(prev.ot);prev.ot=setTimeout(()=>{prev.style.setProperty('--nt','none');prev.classList.remove('out');prev.offsetWidth;prev.style.removeProperty('--nt')},430)}const el=n[pf];if(el){reveal(el);moveInd(el);setTimeout(()=>{reveal(el);if(n[pf]===el||nav()[pf]===el)moveInd(el,1)},430);preview(el)}}
+  let lastScroll=0;pan.addEventListener('scroll',()=>{lastScroll=performance.now()},{passive:true});
+  function fo(i,src){const n=nav(),prev=pan.querySelector('[data-k].on');pf=Math.max(0,Math.min(n.length-1,i));pan.querySelectorAll('[data-k]').forEach(el=>el.classList.toggle('on',el===n[pf]));
+    if(o.exitOut&&prev&&prev!==n[pf]){prev.classList.add('out');clearTimeout(prev.ot);prev.ot=setTimeout(()=>{prev.style.setProperty('--nt','none');prev.classList.remove('out');prev.offsetWidth;prev.style.removeProperty('--nt')},430)}const el=n[pf];const rv=!(o.center&&src==='hover');if(el){if(rv)reveal(el);moveInd(el);setTimeout(()=>{if(rv)reveal(el);if(n[pf]===el||nav()[pf]===el)moveInd(el,1)},430);preview(el)}}
   let cBlk=null,cH=0;
   function reveal(el){if(o.center){
       // keep one section in the middle: Effort, Goal, Mode or Start. Moving inside a section does not scroll
