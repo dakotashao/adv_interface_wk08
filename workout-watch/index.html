@@ -1,3 +1,8 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<script>if(/[?&]thumb/.test(location.search))document.documentElement.classList.add('thumb')</script>
 <title>Workout Watch</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1323,6 +1328,13 @@ html,body{background:#000!important;color:#F1F0ED}
 .spec td{padding:7px 0;border-top:1px solid #2A2A2A;vertical-align:top}
 .spec td:first-child{white-space:nowrap;padding-right:18px;font-weight:500}
 .spec td:last-child{color:#8F8B84}
+/* thumbnail on the overview: only the prototype, filling the frame */
+.thumb .ph,.thumb .specwrap{display:none!important}
+.thumb .wrap{max-width:none!important;padding:0!important;min-height:100vh;display:flex;flex-direction:column;justify-content:center}
+.thumb .panel{margin:0}
+.thumb #pA .wstage{height:100vh!important;border-radius:0!important}
+.thumb .d-stage{height:100vh!important;border-radius:0!important}
+.thumb .d-top{display:none}
 #pB,#pC,#pD{display:none!important}
 #pA .wstage{background:#1A1A1C;height:520px;border-radius:24px}
 .wrap{max-width:820px;min-height:100vh;box-sizing:border-box;display:flex;flex-direction:column;justify-content:center;padding-top:40px;padding-bottom:40px}
@@ -2386,4 +2398,4 @@ document.querySelectorAll('.dg').forEach(makeGame);
 
 window.__mp={makePanel,model};})();
 </script>
-<script>{const b=document.getElementById('specBtn'),s=document.getElementById('spec');b.onclick=()=>{const o=s.hidden;s.hidden=!o;b.setAttribute('aria-expanded',o);if(o)s.scrollIntoView({behavior:'smooth',block:'nearest'})}}</script>
+<script>if(document.documentElement.classList.contains('thumb')&&window.__keyD1){for(let i=0;i<3;i++)window.__keyD1({key:'ArrowRight',preventDefault(){}})}{const b=document.getElementById('specBtn'),s=document.getElementById('spec');b.onclick=()=>{const o=s.hidden;s.hidden=!o;b.setAttribute('aria-expanded',o);if(o)s.scrollIntoView({behavior:'smooth',block:'nearest'})}}</script>
