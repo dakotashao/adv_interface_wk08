@@ -30,8 +30,16 @@ html,body{margin:0;background:#000;color:#fff;font-family:var(--f);-webkit-font-
 /* the device */
 .ipad{position:absolute;left:0;top:0;width:1234px;height:874px;padding:20px;border-radius:52px;background:#161616;box-shadow:inset 0 0 0 1.5px #2a2a2a,0 40px 80px rgba(0,0,0,.6);transform-origin:0 0}
 .screen{position:relative;width:1194px;height:834px;border-radius:34px;overflow:hidden;background:#dedcd8;user-select:none;-webkit-user-select:none}
-.status{position:absolute;left:28px;top:12px;font:500 14px/1 var(--f);color:var(--ink);z-index:3;pointer-events:none}
-.status.r{left:auto;right:28px;letter-spacing:.02em}
+/* iPadOS status bar */
+.status{position:absolute;left:30px;top:9px;display:flex;align-items:center;gap:7px;font:600 14px/1 -apple-system,"SF Pro Text",var(--f);color:var(--ink);z-index:3;pointer-events:none;letter-spacing:-.01em}
+.status .d{font-weight:500}
+.status.r{left:auto;right:30px;gap:8px;font-weight:500}
+.status svg{display:block}
+.status .bat{position:relative;width:27px;height:13px;border:1.3px solid rgba(43,41,37,.38);border-radius:4px;padding:1.3px}
+.status .bat i{display:block;height:100%;width:100%;border-radius:1.8px;background:var(--ink)}
+.status .bat::after{content:"";position:absolute;right:-4px;top:3.5px;width:2px;height:4px;border-radius:0 1px 1px 0;background:rgba(43,41,37,.38)}
+.dots{position:absolute;left:50%;top:7px;transform:translateX(-50%);display:flex;gap:5px;z-index:3;pointer-events:none}
+.dots i{width:5px;height:5px;border-radius:50%;background:rgba(43,41,37,.3)}
 /* the page */
 .scroll{position:absolute;inset:0;overflow:hidden}
 .scroll::-webkit-scrollbar{display:none}
@@ -212,7 +220,7 @@ svg.g{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-widt
 .ring.on .ic{opacity:1}
 .ring .ic.aim{color:var(--ink)}
 .ring .ic svg{width:16px;height:16px}
-.ring .nm{position:absolute;font:400 13px/1 var(--f);color:var(--ink);white-space:nowrap;opacity:0;filter:blur(2px);transition:opacity .25s var(--calm),filter .25s var(--calm)}
+.ring .nm{position:absolute;font:400 12.5px/1 var(--f);color:var(--ink);white-space:nowrap;padding:7px 10px;border-radius:10px;background:var(--paper);box-shadow:0 1px 2px rgba(60,50,30,.06),0 6px 14px rgba(60,50,30,.10);opacity:0;filter:blur(2px);transition:opacity .25s var(--calm),filter .25s var(--calm)}
 .ring .nm.on{opacity:1;filter:none}
 .ring.closing .arc,.ring.closing .ic:not(.aim),.ring.closing .nm{opacity:0;transition-duration:.16s}
 .ring.closing .sheet,.ring.closing .ic{opacity:0;transition:opacity .22s var(--calm) .06s}
@@ -226,7 +234,7 @@ svg.g{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-widt
   
   <div class="fit" id="fit">
     <div class="ipad" id="ipad"><div class="screen" id="screen">
-      <span class="status">9:41</span><span class="status r">100%</span>
+      <span class="status">9:41<span class="d">Sat Nov 7</span></span><span class="status r"><svg width="16" height="12" viewBox="0 0 16 12"><path d="M8 11.3l2.3-2.6a3.4 3.4 0 0 0-4.6 0z" fill="#2b2925"/><path d="M3.9 6.8a5.9 5.9 0 0 1 8.2 0l1.4-1.6a8 8 0 0 0-11 0z" fill="#2b2925"/><path d="M1 3.6a10.2 10.2 0 0 1 14 0L16 2.1a12.4 12.4 0 0 0-16 0z" fill="#2b2925"/></svg>100%<span class="bat"><i></i></span></span>
       <div class="zone" id="zone"></div><div class="tb" id="tb" data-side="top" data-size="full" role="toolbar" aria-label="Reading tools"><span class="curt" id="curt"></span><div class="tools" id="tools"><span class="ind" id="ind"></span></div><div class="opts" id="opts"></div><div class="rg" id="rg"></div><span class="grip" aria-hidden="true"></span></div>
       <div class="scroll" id="scroll"><div class="book" id="book"><div class="track" id="track">
         <section class="lp">
@@ -534,7 +542,7 @@ function moveRing(p){const g=ring,dx=p.x-g.c.x,dy=p.y-g.c.y,dist=Math.hypot(dx,d
   if(g.aim){const c=un(ANG[g.aim]);s.t0=c-HALF;s.t1=c+HALF}else{const c=un(ang);s.t0=c-3;s.t1=c+3}
   g.L.querySelector('.sheet').classList.toggle('on',dist>6);
   g.L.querySelectorAll('.ic').forEach(e=>e.classList.toggle('aim',e.dataset.d===g.aim));
-  const nm=g.L.querySelector('.nm');if(g.aim){const a=rad(ANG[g.aim]),r=R+20;nm.textContent=NAMES[MAP[g.aim]];nm.style.left=Math.cos(a)*r+'px';nm.style.top=Math.sin(a)*r+'px';nm.style.transform={up:'translate(-50%,-100%)',down:'translate(-50%,0)',left:'translate(-100%,-50%)',right:'translate(0,-50%)'}[g.aim];nm.classList.add('on')}else nm.classList.remove('on')}
+  const nm=g.L.querySelector('.nm');if(g.aim){const a=rad(ANG[g.aim]),r=R+12+10;nm.textContent=NAMES[MAP[g.aim]];nm.style.left=Math.cos(a)*r+'px';nm.style.top=Math.sin(a)*r+'px';nm.style.transform={up:'translate(-50%,-100%)',down:'translate(-50%,0)',left:'translate(-100%,-50%)',right:'translate(0,-50%)'}[g.aim];nm.classList.add('on')}else nm.classList.remove('on')}
 function ringStep(){if(!ring||!ring.s.init)return;const s=ring.s,fw=s.t1>s.a1,bw=s.t0<s.a0;s.a1+=(s.t1-s.a1)*(fw?.24:.12);s.a0+=(s.t0-s.a0)*(bw?.24:.12);ring.L.querySelector('.sheet').setAttribute('d',arcD(s.a0,Math.max(s.a1,s.a0+.01)))}
 function closeRing(instant){if(!ring)return;const g=ring;ring=null;if(g.aim&&!instant)setTool(MAP[g.aim]);
   g.L.classList.add('closing');setTimeout(()=>g.L.remove(),instant?0:320)}
