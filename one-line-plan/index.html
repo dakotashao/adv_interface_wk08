@@ -19,7 +19,7 @@
 html,body{height:100%}
 body{background:#121212;color:var(--cream);font-family:var(--font);font-weight:300;
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
-  display:grid;place-items:center}
+  display:grid;place-items:center;align-content:center}
 .stage{position:relative;width:min(900px,100%);min-height:580px;background:var(--ground);overflow:hidden;
   padding:72px clamp(20px,5vw,64px) 40px;margin-block:16px}
 
@@ -107,6 +107,34 @@ body{background:#121212;color:var(--cream);font-family:var(--font);font-weight:3
 
 
 .read{position:absolute;left:clamp(20px,5vw,64px);right:clamp(20px,5vw,64px);bottom:28px;font-size:14px;color:var(--muted)}
+
+/* spec */
+.stage,.spec{box-sizing:border-box}
+.specwrap{width:min(900px,100%);margin:0 auto 24px;display:flex;flex-direction:column;align-items:flex-start;gap:12px}
+.specbtn{font:300 15px var(--font);color:var(--cream);background:none;border:1px solid var(--cream);border-radius:999px;padding:8px 18px;cursor:pointer}
+.specbtn[aria-expanded="true"]{background:var(--cream);color:var(--ink);border-radius:0}
+.spec{width:100%;background:var(--ground);padding:36px clamp(20px,5vw,64px);display:flex;flex-direction:column;gap:34px;font-size:15px;line-height:1.5}
+.spec[hidden]{display:none}
+.spec h3{margin:0 0 12px;font-weight:400;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.spec ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px;max-width:68ch}
+.spec b{font-weight:400}
+.spec .two{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:28px}
+.spec table{border-collapse:collapse;width:100%}
+.spec td{padding:6px 0;border-top:1px solid #333;vertical-align:top}
+.spec td:first-child{white-space:nowrap;padding-right:18px}
+.spec td:last-child{color:var(--muted)}
+.states{display:flex;flex-wrap:wrap;gap:22px}
+.states figure{margin:0;display:flex;flex-direction:column;gap:8px}
+.states figcaption{font-size:12px;color:var(--muted)}
+.sh.mini{height:44px;font-size:20px;cursor:default;pointer-events:none;align-self:flex-start;padding-right:22px}
+.sh.mini .kk{font-size:12px;opacity:.5;margin-left:4px}
+.sh.mini svg{width:20px;height:20px;flex:none}
+.sh.mini.hov,.sh.mini.sel{border-radius:0}
+.sh.mini.hov svg{transform:rotate(90deg)}
+.sh.mini.prs{border-radius:4px;transform:scaleY(.88)}
+.sh.mini.opn{border-radius:22px 22px 0 0}
+.sw{display:grid;grid-template-columns:18px 1fr;gap:8px 12px;align-items:center;font-size:14px;color:var(--muted)}
+.sw i{width:18px;height:18px;border-radius:50%}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 
@@ -127,6 +155,67 @@ body{background:#121212;color:var(--cream);font-family:var(--font);font-weight:3
     <span class="slot"><button class="sh go" id="go" aria-label="Start this plan"><svg viewBox="0 0 28 28"><path class="ar" d="M4 14h20M16 6l8 8-8 8"/><rect class="st" x="7" y="7" width="14" height="14"/></svg><span class="nm" id="goLbl">Start</span></button></span>
   </div>
     <div class="read" id="read">Tap a colored word, or press A F B T S. Enter starts.</div>
+</div>
+
+<div class="specwrap">
+  <button class="specbtn" id="specBtn" aria-expanded="false" aria-controls="spec">Spec</button>
+  <section class="spec" id="spec" hidden>
+    <div class="sp">
+      <h3>Rules</h3>
+      <ul>
+        <li><b>One sentence is the menu.</b> White words are fixed; each colored word is a trigger that drops its own list.</li>
+        <li><b>Length is time.</b> A time word is 150&thinsp;px plus a fixed width per minute, so 30 min is visibly half of 60.</li>
+        <li><b>Square corners mean selected.</b> Hover squares an option as a preview; the open trigger flattens its bottom so the list hangs from it.</li>
+        <li><b>Color is category.</b> Each word has its own color; in sound, blue is nature, green is scene, lilac picks directly.</li>
+        <li><b>Solid and line alternate.</b> Icons inside one list switch between a solid shape and a thin line, like the reference.</li>
+      </ul>
+    </div>
+    <div class="sp">
+      <h3>States</h3>
+      <div class="states">
+        <figure><span class="sh mini">__S{G.read}<span>read</span></span><figcaption>Default</figcaption></figure>
+        <figure><span class="sh mini hov">__S{G.read}<span>read</span></span><figcaption>Hover · square, icon turns 90°</figcaption></figure>
+        <figure><span class="sh mini prs">__S{G.read}<span>read</span></span><figcaption>Pressed · squash to 88%</figcaption></figure>
+        <figure><span class="sh mini sel">__S{G.read}<span>read</span></span><figcaption>Selected · square</figcaption></figure>
+        <figure><span class="sh mini opn">__S{G.read}<span>read</span></span><figcaption>Open trigger · flat bottom</figcaption></figure>
+      </div>
+    </div>
+    <div class="sp">
+      <h3>List item</h3>
+      <div class="states">
+        <figure><span class="sh mini sel" style="--c:var(--green)">__S{G.cafe}<span>café</span><span class="tag">last</span><span class="kk">3</span></span><figcaption>Icon · label · badge · number key</figcaption></figure>
+        <figure><span class="sh mini" style="--c:var(--cobalt);--fg:#fff">__S{G.nature}<span>nature</span>__S{G.more}<span class="kk">1</span></span><figcaption>Category · opens a column of its sounds</figcaption></figure>
+      </div>
+    </div>
+    <div class="sp two">
+      <div><h3>Shortcuts</h3>
+        <table><tr><td>A F B T S</td><td>Open activity, focus, break, break time, sound</td></tr>
+        <tr><td>1–9</td><td>Pick in the open list</td></tr>
+        <tr><td>← →</td><td>Focus ±5 min, break ±1 min</td></tr>
+        <tr><td>↑ ↓</td><td>Move in the open list</td></tr>
+        <tr><td>Esc</td><td>Close</td></tr>
+        <tr><td>Enter</td><td>First press shows the total, second starts</td></tr></table></div>
+      <div><h3>Motion</h3>
+        <table><tr><td>Spring</td><td>cubic-bezier(.34,1.56,.64,1), 450–550 ms: width, drop, icon turn</td></tr>
+        <tr><td>Typing</td><td>34 ms per letter when a word changes</td></tr>
+        <tr><td>Running</td><td>Time word shrinks linearly into a circle; the finished half of the sentence folds away</td></tr></table></div>
+    </div>
+    <div class="sp two">
+      <div><h3>Color</h3><div class="sw">
+        <i style="background:var(--lemon)"></i><span>Activity #EAEA00</span>
+        <i style="background:var(--lilac)"></i><span>Focus · Plain #DCCBF7</span>
+        <i style="background:var(--tang)"></i><span>Break #FF5C0F</span>
+        <i style="background:var(--amber)"></i><span>Break time #FFA800</span>
+        <i style="background:var(--cobalt)"></i><span>Nature #0A1EFF</span>
+        <i style="background:var(--green)"></i><span>Scene #08A455</span>
+        <i style="background:var(--violet)"></i><span>Start #8E1FEF</span>
+        <i style="background:var(--ground);box-shadow:inset 0 0 0 1px #444"></i><span>Ground #1D1D1D</span></div></div>
+      <div><h3>Type</h3>
+        <table><tr><td>Hanken Grotesk Light 300</td><td></td></tr>
+        <tr><td>Sentence</td><td>40 px</td></tr><tr><td>Trigger</td><td>30 px</td></tr>
+        <tr><td>Option</td><td>22 px</td></tr><tr><td>Keys, badge</td><td>12–13 px</td></tr></table></div>
+    </div>
+  </section>
 </div>
 
 <script>
@@ -239,7 +328,9 @@ function openList(k){
       vals.forEach(v=>sub.appendChild(item(k,v,0,d)));
       const show=v=>{if(v)$$('.crow .sub').forEach(x=>{if(x!==sub){x.hidden=true;x.previousSibling.setAttribute('aria-expanded','false')}});
         sub.hidden=!v;cb.setAttribute('aria-expanded',v);
-        if(v){const sr=$('#stage').getBoundingClientRect(),lr=L.getBoundingClientRect();if(lr.right>sr.right-16)L.style.left=(parseFloat(L.style.left)||0)-(lr.right-sr.right+16)+'px'}};
+        if(v){const wide=Math.max(...[...L.children].map(c=>c.offsetWidth));sub.style.left=(wide+8)+'px';   /* clear the widest first-level item */
+          const subW=Math.max(...[...sub.children].map(c=>c.offsetWidth)),sr=$('#stage').getBoundingClientRect(),right=r.getBoundingClientRect().left+wide+8+subW;
+          if(right>sr.right-16)L.style.left=(parseFloat(L.style.left)||0)-(right-sr.right+16)+'px'}};
       cb.onmouseenter=()=>show(true);cb.onclick=()=>{show(true);sub.querySelector('.sh').focus()};
       cb.showSub=show;cb.subRow=sub;
       r.append(cb,sub);add(r);order.push(['more',cb]);
@@ -316,6 +407,10 @@ function stop(){clearInterval(running);running=null;$('#go').classList.remove('r
 function scale(){const w=$('#line').clientWidth;u=Math.max(1.6,Math.min(4.5,(w-260)/80));
   ['focus','brk'].forEach(k=>$(`.slot[data-k="${k}"] .trig`).style.width=W(M[k].sel)+'px')}
 $$('.slot[data-k]').forEach(makeTrig);
+/* spec: fill in icons and toggle */
+$('#spec').innerHTML=$('#spec').innerHTML.replace(/__S\{G\.(\w+)\}/g,(_,n)=>G[n]);
+$('#specBtn').onclick=e=>{e.stopPropagation();const o=$('#spec').hidden;$('#spec').hidden=!o;$('#specBtn').setAttribute('aria-expanded',o);
+  if(o)$('#spec').scrollIntoView({behavior:'smooth',block:'start'})};
 addEventListener('resize',scale);scale();
 </script>
 
