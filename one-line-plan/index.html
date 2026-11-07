@@ -54,6 +54,10 @@ body{background:#121212;color:var(--cream);font-family:var(--font);font-weight:3
 .trig.ticking .u{display:none}
 .trig.ticking .caret{display:none}
 .line>*{transition:opacity .4s}
+/* the last phrase stays together, so the start arrow never sits alone on a line */
+.tail{display:inline-flex;align-items:center;flex-wrap:wrap;column-gap:14px;row-gap:18px;max-width:100%}
+.tail>*{transition:opacity .4s}
+.running .tail>*:not(.active):not(.goslot){opacity:.25}
 .line>.done{max-width:0!important;opacity:0;overflow:hidden;transition:max-width .5s cubic-bezier(.6,0,.3,1),opacity .25s}
 .running .line>*:not(.active):not(:last-child){opacity:.25}
 
@@ -156,9 +160,11 @@ body{background:#121212;color:var(--cream);font-family:var(--font);font-weight:3
     <span class="slot" data-k="rest"></span>
     <span class="word">for</span>
     <span class="slot" data-k="brk"></span><span class="word" style="margin-left:-10px">,</span>
+    <span class="tail">
     <span class="word">with</span>
     <span class="slot" data-k="sound"></span>
     <span class="slot"><button class="sh go" id="go" aria-label="Start this plan"><svg viewBox="0 0 28 28"><path class="ar" d="M4 14h20M16 6l8 8-8 8"/><path class="st" d="M11 7v14M17 7v14"/></svg><span class="nm" id="goLbl">Start</span></button><button class="sh cancel" id="cancel" hidden><svg viewBox="0 0 28 28"><path d="M8 8l12 12M20 8 8 20"/></svg><span>Cancel</span></button></span>
+    </span>
   </div>
     <div class="read" id="read">Tap a colored word, or press A F B T S. Enter starts.</div>
 </div>
@@ -302,6 +308,10 @@ function makeTrig(slot){
   const L=document.createElement('div');L.className='list';L.setAttribute('role','menu');L.hidden=true;L.onclick=e=>e.stopPropagation();
   slot.append(b,L);render(k,false);
 }
+/* the start slot reserves the width of its open label, so the line wraps for it and hover always grows rightward */
+function reserveGo(){const go=$('#go'),slot=go.parentElement,was=go.classList.contains('armed');
+  go.style.transition='none';go.classList.add('armed');const w=go.offsetWidth;if(!was)go.classList.remove('armed');
+  void go.offsetWidth;go.style.transition='';slot.style.width=w+'px'}
 function render(k,animate=true){
   const b=$(`.slot[data-k="${k}"] .trig`),d=M[k];
   if(d.timed)b.style.width=W(d.sel)+'px';
@@ -309,7 +319,7 @@ function render(k,animate=true){
   if(k==='sound'){const [cc,fg]=colorOf(k,d.sel);b.style.setProperty('--c',`var(${cc})`);b.style.setProperty('--fg',fg)}
   const txt=label(k,d.sel);
   animate?typeTo(b,txt):b.querySelector('.t').textContent=txt;
-  if(!running)$('#goLbl').textContent=`Start · ${M.focus.sel+M.brk.sel} min`;
+  if(!running){$('#goLbl').textContent=`Start · ${M.focus.sel+M.brk.sel} min`;if($('#go').parentElement.classList.contains('goslot'))reserveGo()}
 }
 function toggle(k){if(running)return;open===k?close():openList(k)}
 function item(k,v,i,d){
@@ -425,9 +435,8 @@ function scale(){
   ['focus','brk'].forEach(k=>$(`.slot[data-k="${k}"] .trig`).style.width=W(M[k].sel)+'px')}
 $$('.slot[data-k]').forEach(makeTrig);
 /* start: one circle in the sentence; on hover the label grows over the page, away from the edge, without moving anything */
-{const go=$('#go');go.parentElement.classList.add('goslot');
-  const grow=()=>{const sr=$('#stage').getBoundingClientRect(),gr=go.parentElement.getBoundingClientRect();
-    go.classList.toggle('flip',sr.right-gr.left<300);go.classList.add('armed')};
+{const go=$('#go');go.parentElement.classList.add('goslot');reserveGo();
+  const grow=()=>{go.classList.remove('flip');go.classList.add('armed')};
   const shrink=()=>{if(!running)go.classList.remove('armed')};
   go.addEventListener('mouseenter',grow);go.addEventListener('focus',grow);
   go.addEventListener('mouseleave',shrink);go.addEventListener('blur',shrink);}
