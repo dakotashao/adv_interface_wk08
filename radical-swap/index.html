@@ -29,7 +29,7 @@ body{margin:0;background:var(--ground);color:var(--ink);font:400 14px/1.45 var(-
 .zh{font-family:var(--zh)}
 
 /* device: designed at 1180 × 820, scaled to fit */
-.stage{position:relative;margin:0 auto;width:min(100%,1180px)}
+.stage{position:relative;margin:0 auto;width:min(100%,1000px,calc((100vh - 110px) * 1.439))}
 .stage::before{content:"";display:block;padding-top:69.49%}
 .ipad{position:absolute;top:0;left:0;width:1180px;height:820px;transform-origin:0 0;border-radius:26px;overflow:hidden;background:var(--field);
   box-shadow:0 0 0 1px rgba(0,0,0,.06),0 30px 80px rgba(0,0,0,.12);display:grid;grid-template-columns:380px 1fr}
@@ -152,7 +152,7 @@ body{margin:0;background:var(--ground);color:var(--ink);font:400 14px/1.45 var(-
 .item:focus-visible{outline:none;border-bottom-color:var(--red)}
 
 /* spec, below the device */
-.spec{max-width:1180px;margin:56px auto 0;display:grid;grid-template-columns:380px 1fr;gap:0 64px;font-size:12.5px;line-height:19px}
+.spec{max-width:1000px;margin:56px auto 0;display:grid;grid-template-columns:380px 1fr;gap:0 64px;font-size:12.5px;line-height:19px}
 .spec h2{margin:0;font:600 28px/1.15 var(--ui);letter-spacing:-.015em}
 .spec p{color:var(--ink-2);font-size:14px;line-height:23px;max-width:320px}
 .spec .tables{display:grid;grid-template-columns:1fr 1fr;gap:0 40px}
