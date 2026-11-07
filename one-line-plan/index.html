@@ -178,7 +178,7 @@ body{background:#121212;color:var(--cream);font-family:var(--font);font-weight:3
       <h3>Rules</h3>
       <ul>
         <li><b>One sentence is the menu.</b> White words are fixed; each colored word is a trigger that drops its own list.</li>
-        <li><b>Length is time.</b> Both time words share one scale: width grows from 180&thinsp;px to a 300&thinsp;px cap at 60 min, so 30 min sits halfway. Time moves in 5-minute steps.</li>
+        <li><b>Length is time.</b> Both time words share one scale: width grows from 130&thinsp;px to a fixed 260&thinsp;px cap at 60 min, so 30 min sits halfway. Time moves in 5-minute steps.</li>
         <li><b>Square corners mean selected.</b> Hover squares an option as a preview; the open trigger flattens its bottom so the list hangs from it.</li>
         <li><b>Color is category.</b> Each word has its own color; in sound, blue is nature, green is scene, lilac picks directly.</li>
         <li><b>Solid and line alternate.</b> Icons inside one list switch between a solid shape and a thin line, like the reference.</li>
@@ -283,8 +283,8 @@ const SC={rain:'--cobalt',ocean:'--cobalt',cafe:'--green',library:'--green',nois
 const colorOf=(k,v)=>k==='sound'?[SC[v],SC[v]==='--cobalt'?'#fff':'var(--ink)']:[M[k].c,M[k].fg||'var(--ink)'];
 let last={act:'write',focus:30,rest:'stretch',brk:5,sound:'cafe'};
 let u=3, open=null, running=null;
-/* one scale for both time words: 0 min = 180px (fits the label and its shortcut), 60 min = 300px (the cap) */
-const WMIN=180,WMAX=300;
+/* one scale for both time words: 0 min = 130px (just fits the label), 60 min = 260px (fixed cap); the time words' shortcut shows in the hint line */
+const WMIN=130,WMAX=260;
 const W=m=>Math.round(WMIN+(Math.min(WMAX,($('#line')?.clientWidth||900)-20)-WMIN)*Math.min(m,60)/60);
 /* ruler: one tick per 5 min, a tall one every 15 */
 const ticks=m=>Array.from({length:Math.ceil(m/5)},(_,i)=>`<i${(i+1)%3===0?' class="q"':''}></i>`).join('');
@@ -306,7 +306,7 @@ function makeTrig(slot){
   const b=document.createElement('button');
   b.className='sh trig'+(d.timed?' timed':'');b.setAttribute('aria-haspopup','menu');b.setAttribute('aria-expanded','false');
   b.style.setProperty('--c',`var(${d.c})`);if(d.fg)b.style.setProperty('--fg',d.fg);
-  b.innerHTML=(d.timed?'':`<span class="g"></span>`)+`<span class="t"></span><span class="caret"></span><small class="lk">${KEY[k]}${d.timed?' ←→':''}</small>`;
+  b.innerHTML=(d.timed?'':`<span class="g"></span>`)+`<span class="t"></span><span class="caret"></span>${d.timed?'':`<small class="lk">${KEY[k]}</small>`}`;
   /* the shortcut shows in the hint line, never on top of the word */
   const NAME={act:'activity',focus:'focus time',rest:'break',brk:'break time',sound:'sound'};
   const hint=()=>{if(!open&&!running)$('#read').textContent=`${NAME[k]}: press ${KEY[k]} to open`+(d.timed?' · ← → adds or removes 5 min':'')};
