@@ -1,20 +1,9 @@
 # adv_interface_wk08
 
-Advanced Interface Design, Week 8: Menu.
+Advanced Interface, week 8: Menu.
 
-## Sets
-
-| Set | Tone | Link |
+| Set | Concept | Prototype |
 |---|---|---|
-| One-Line Plan | Playful | [one-line-plan/](one-line-plan/) |
+| 1 | **One-Line Plan**: a plan written as one sentence, *I want to [read] for [45 min], then [take a walk] for [10 min], with [rain] →*. Each colored word drops its own options. Time words grow with their minutes; square corners mark the choice; sounds are grouped by color, and a group's arrow circle opens more of that group below it. ← → fine-tunes time, numbers pick, Enter starts; the finished half of the sentence folds away as the plan runs | [Open](https://dakotashao.github.io/adv_interface_wk08/one-line-plan/) |
 
-### One-Line Plan
-
-A plan written as one sentence: *I want to [read] for [45 min], then [take a walk] for [10 min], with [rain] →*. Each colored word is a menu trigger that drops its own options.
-
-- **Length is time.** Time words grow with their minutes; the dropdown reads like a staircase.
-- **Square corners mean selected.** Hovering an option squares it as a preview.
-- **Sections and submenu.** Sounds are grouped by color, one row per group (Nature, Places, Plain). A group's own arrow circle opens more of that group just below it (Nature: birds, thunder; Places: train, fireplace).
-- **Shortcuts.** Numbers pick inside an open list; A F B T S open each word; ← → fine-tune time (5 min focus, 1 min break); Enter starts.
-- **Badge.** A small outlined `last` tag marks what you used last time.
-- **Running.** Time words shrink into a circle and the finished half of the sentence folds away.
+Each set lives in its own folder with a self-contained index.html.
