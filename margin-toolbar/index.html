@@ -123,10 +123,14 @@ svg.ink path.pencil{opacity:.72}
 @keyframes in{from{opacity:0;filter:blur(3px);transform:translateY(4px)}}
 
 /* the toolbar: two rows, the white sheet marks the tool in hand */
-.tb{position:absolute;left:0;top:0;z-index:4;display:flex;flex-direction:column;align-items:center;padding:7px;border-radius:26px;background:var(--paper);box-shadow:0 1px 2px rgba(60,50,30,.06),0 18px 40px rgba(60,50,30,.16);cursor:grab;transition:left .6s var(--calm),top .6s var(--calm),box-shadow .4s var(--calm)}
+.tb{position:absolute;left:0;top:0;z-index:4;display:flex;flex-direction:column;align-items:center;padding:7px;border-radius:26px;background:rgba(241,240,237,.72);-webkit-backdrop-filter:blur(30px) saturate(1.5);backdrop-filter:blur(30px) saturate(1.5);box-shadow:0 1px 2px rgba(60,50,30,.06),0 18px 40px rgba(60,50,30,.16);cursor:grab;transition:left .6s var(--calm),top .6s var(--calm),box-shadow .4s var(--calm)}
 .tb.drag{transition:none;cursor:grabbing;box-shadow:0 1px 2px rgba(60,50,30,.06),0 30px 60px rgba(60,50,30,.26)}
 .tb.sizing{overflow:hidden;transition:none}
 .tb.settle{overflow:hidden;transition:left .6s var(--calm),top .6s var(--calm),width .5s var(--calm),height .5s var(--calm)}
+/* 2. when the Pencil works near or under the bar, the bar steps aside: it fades and lets the stroke through */
+.tb{transition:left .6s var(--calm),top .6s var(--calm),box-shadow .4s var(--calm),opacity .45s var(--calm)}
+.tb.ghost{opacity:.14;pointer-events:none}
+.ring .arc{stroke:rgba(241,240,237,.9)}
 /* where it sits decides its direction */
 .tb[data-side="bottom"]{flex-direction:column-reverse}
 .tb[data-side="left"]{flex-direction:row;align-items:flex-start}
@@ -568,8 +572,9 @@ scroll.addEventListener('pointermove',e=>{if(!act)return;const sp=local(e,screen
   if(act.kind==='pen'){act.pts.push(dp);const pencil=sel.pen.kind===1,col=OPTS.pen[1].sw[sel.pen.color];
     if(!act.path)act.path=newStroke(act.pts,pencil?'pencil':'pen',col,pencil?1.6:2.4,++uid);else{act.path._pts=act.pts;act.path.setAttribute('d',smooth(act.pts))}}
   else if(act.kind==='hl'){const r=rangeBetween(act.caret,caretAt(e.clientX,e.clientY));act.range=r;if(r&&window.Highlight&&CSS.highlights)CSS.highlights.set('preview',new Highlight(r))}
-  else if(act.kind==='er')eraseAt(e,dp)});
-function up(e){if(!act)return;const a=act;act=null;clearTimeout(a.hold);
+  else if(act.kind==='er')eraseAt(e,dp);
+  if(act&&act.moved&&act.kind!=='ring'){const r=tb.getBoundingClientRect(),m=36*S;tb.classList.toggle('ghost',e.clientX>r.left-m&&e.clientX<r.right+m&&e.clientY>r.top-m&&e.clientY<r.bottom+m)}});
+function up(e){if(!act)return;const a=act;act=null;clearTimeout(a.hold);setTimeout(()=>tb.classList.remove('ghost'),500);
   if(a.kind==='ring'){closeRing();return}
   if(a.kind==='hl'){CSS.highlights&&CSS.highlights.delete('preview');if(a.range&&!a.range.collapsed)wrap(a.range)}
   if(a.kind==='cm'&&!a.moved)addNote(a.startD,a.caret)}
