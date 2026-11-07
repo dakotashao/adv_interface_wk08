@@ -342,12 +342,12 @@ function pick(g,i,el){sel[tool][g.k]=i;[...el.querySelectorAll('.sw,.ob')].forEa
 function relabel(b,text){const s=b.querySelector('.t'),w0=b.offsetWidth;s.textContent=text;const w1=b.offsetWidth;
   b.animate([{width:w0+'px'},{width:w1+'px'}],{duration:650,easing:'cubic-bezier(.22,1,.36,1)'});s.animate([{opacity:0,filter:'blur(3px)'},{opacity:1,filter:'none'}],{duration:550,easing:'cubic-bezier(.22,1,.36,1)'})}
 function oshStep(){OSH.forEach(o=>{const b=o.el.querySelector('.ob[aria-pressed="true"]');if(!b)return;const T={l:b.offsetLeft,r:b.offsetLeft+b.offsetWidth,t:b.offsetTop,b:b.offsetTop+b.offsetHeight};
-  if(!o.init){Object.assign(o,T);o.init=true}o.r+=(T.r-o.r)*(T.r>o.r?K(.14):K(.07));o.l+=(T.l-o.l)*(T.l<o.l?K(.14):K(.07));o.b+=(T.b-o.b)*(T.b>o.b?K(.14):K(.07));o.t+=(T.t-o.t)*(T.t<o.t?K(.14):K(.07));
+  if(!o.init){Object.assign(o,T);o.init=true}o.r+=(T.r-o.r)*(T.r>o.r?.2:.1);o.l+=(T.l-o.l)*(T.l<o.l?.2:.1);o.b+=(T.b-o.b)*(T.b>o.b?.2:.1);o.t+=(T.t-o.t)*(T.t<o.t?.2:.1);
   o.s.style.transform=`translate(${o.l}px,${o.t}px)`;o.s.style.width=(o.r-o.l)+'px';o.s.style.height=(o.b-o.t)+'px'})}
 function resetAsk(){const was=clearAsk;clearTimeout(clearAsk);clearAsk=null;const b=opts.querySelector('.ob.danger');if(b&&was){b.classList.remove('ask');relabel(b,'Clear')}}
 function setTool(k){if(k!==tool)prevTool=tool;tool=k;{const c=$('#curt');if(c){c.innerHTML=svgI(k);c.animate([{opacity:0,filter:'blur(3px)'},{opacity:1,filter:'none'}],{duration:500,easing:'cubic-bezier(.22,1,.36,1)'})}}doc.dataset.tool=k;resetAsk();tools.querySelectorAll('.tool').forEach(b=>b.setAttribute('aria-pressed',b.dataset.k===k));placeInd();renderOpts();if(typeof place==='function'&&tb.isConnected)requestAnimationFrame(place)}
 let DTN=1,lastT=performance.now();const K=k=>1-Math.pow(1-k,DTN);
-(function loop(now){now=now||performance.now();DTN=Math.min(4,(now-lastT)/16.667)||1;lastT=now;if(IS.init){const T=IS.T;IS.r+=(T.r-IS.r)*(T.r>IS.r?K(.14):K(.07));IS.l+=(T.l-IS.l)*(T.l<IS.l?K(.14):K(.07));IS.b+=(T.b-IS.b)*(T.b>IS.b?K(.14):K(.07));IS.t+=(T.t-IS.t)*(T.t<IS.t?K(.14):K(.07));
+(function loop(now){now=now||performance.now();lastT=now;if(IS.init){const T=IS.T;IS.r+=(T.r-IS.r)*(T.r>IS.r?.2:.1);IS.l+=(T.l-IS.l)*(T.l<IS.l?.2:.1);IS.b+=(T.b-IS.b)*(T.b>IS.b?.2:.1);IS.t+=(T.t-IS.t)*(T.t<IS.t?.2:.1);
   ind.style.transform=`translate(${IS.l}px,${IS.t}px)`;ind.style.width=(IS.r-IS.l)+'px';ind.style.height=(IS.b-IS.t)+'px';if(tb.classList.contains('sizing')||tb.classList.contains('settle'))placeInd()}ringStep();rgStep();oshStep();requestAnimationFrame(loop)})();
 
 /* ---- move it anywhere; its edge sets its size ---- */
@@ -368,7 +368,7 @@ const RH=n=>Math.max(1,360/n/2-12/RR*180/Math.PI-2.5);
 function rSheet(svg,key,a,half){const p=document.createElementNS('http://www.w3.org/2000/svg','path');p.setAttribute('class','sh');svg.append(p);
   const m=SHM[key]||{a0:a-half,a1:a+half},s={p,key,a0:m.a0,a1:m.a1};const mid=(s.a0+s.a1)/2;while(a-mid>180)a-=360;while(a-mid<-180)a+=360;s.t0=a-half;s.t1=a+half;
   p.setAttribute('d',rArc(s.a0,Math.max(s.a1,s.a0+.01)));SHS.add(s)}
-function rgStep(){SHS.forEach(s=>{if(!s.p.isConnected){SHS.delete(s);return}s.a1+=(s.t1-s.a1)*(s.t1>s.a1?K(.14):K(.07));s.a0+=(s.t0-s.a0)*(s.t0<s.a0?K(.14):K(.07));SHM[s.key]={a0:s.a0,a1:s.a1};s.p.setAttribute('d',rArc(s.a0,Math.max(s.a1,s.a0+.01)))})}
+function rgStep(){SHS.forEach(s=>{if(!s.p.isConnected){SHS.delete(s);return}s.a1+=(s.t1-s.a1)*(s.t1>s.a1?.2:.1);s.a0+=(s.t0-s.a0)*(s.t0<s.a0?.2:.1);SHM[s.key]={a0:s.a0,a1:s.a1};s.p.setAttribute('d',rArc(s.a0,Math.max(s.a1,s.a0+.01)))})}
 let rgKey='',rgAsk=null;
 function renderRing(){const items=[];
   if(picker)['hl','cm','er','pen'].forEach(k=>items.push({ic:k,on:k===tool,key:'pick',act:()=>{picker=false;setTool(k)}}));
@@ -533,7 +533,7 @@ function moveRing(p){const g=ring,dx=p.x-g.c.x,dy=p.y-g.c.y,dist=Math.hypot(dx,d
   g.L.querySelector('.sheet').classList.toggle('on',dist>6);
   g.L.querySelectorAll('.ic').forEach(e=>e.classList.toggle('aim',e.dataset.d===g.aim));
   const nm=g.L.querySelector('.nm');if(g.aim){const a=rad(ANG[g.aim]),r=R+20;nm.textContent=NAMES[MAP[g.aim]];nm.style.left=Math.cos(a)*r+'px';nm.style.top=Math.sin(a)*r+'px';nm.style.transform={up:'translate(-50%,-100%)',down:'translate(-50%,0)',left:'translate(-100%,-50%)',right:'translate(0,-50%)'}[g.aim];nm.classList.add('on')}else nm.classList.remove('on')}
-function ringStep(){if(!ring||!ring.s.init)return;const s=ring.s,fw=s.t1>s.a1,bw=s.t0<s.a0;s.a1+=(s.t1-s.a1)*(fw?K(.24):K(.12));s.a0+=(s.t0-s.a0)*(bw?K(.24):K(.12));ring.L.querySelector('.sheet').setAttribute('d',arcD(s.a0,Math.max(s.a1,s.a0+.01)))}
+function ringStep(){if(!ring||!ring.s.init)return;const s=ring.s,fw=s.t1>s.a1,bw=s.t0<s.a0;s.a1+=(s.t1-s.a1)*(fw?.24:.12);s.a0+=(s.t0-s.a0)*(bw?.24:.12);ring.L.querySelector('.sheet').setAttribute('d',arcD(s.a0,Math.max(s.a1,s.a0+.01)))}
 function closeRing(instant){if(!ring)return;const g=ring;ring=null;if(g.aim&&!instant){setTool(MAP[g.aim]);chip(g.c,NAMES[MAP[g.aim]])}
   g.L.classList.add('closing');setTimeout(()=>{g.L.classList.remove('on');setTimeout(()=>g.L.remove(),450)},instant?0:240)}
 function chip(p,t){const c=document.createElement('div');c.className='chip';c.textContent=t;c.style.left=p.x+'px';c.style.top=p.y+'px';screen.append(c);setTimeout(()=>c.remove(),1400)}
