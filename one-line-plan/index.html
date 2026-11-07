@@ -97,6 +97,11 @@ body{background:#121212;color:var(--cream);font-family:var(--font);font-weight:3
 .go .nm{font-size:22px;max-width:0;overflow:hidden;transition:max-width .55s var(--spring)}
 .go.armed .nm,.go.run .nm{max-width:320px}
 .go:hover svg,.go:focus-visible svg{transform:translateX(4px)}
+.go .st{opacity:0;transform:scale(.3);transform-origin:14px 14px;transition:opacity .2s,transform .45s var(--spring)}
+.go .ar{transition:opacity .2s}
+.go.run .ar{opacity:0}
+.go.run .st{opacity:1;transform:none}
+.go.run:hover svg,.go.run:focus-visible svg{transform:none}
 
 
 .read{position:absolute;left:clamp(20px,5vw,64px);right:clamp(20px,5vw,64px);bottom:28px;font-size:14px;color:var(--muted)}
@@ -117,7 +122,7 @@ body{background:#121212;color:var(--cream);font-family:var(--font);font-weight:3
     <span class="slot" data-k="brk"></span><span class="word" style="margin-left:-10px">,</span>
     <span class="word">with</span>
     <span class="slot" data-k="sound"></span>
-    <span class="slot"><button class="sh go" id="go" aria-label="Start this plan"><svg viewBox="0 0 28 28"><path d="M4 14h20M16 6l8 8-8 8"/></svg><span class="nm" id="goLbl">Start</span></button></span>
+    <span class="slot"><button class="sh go" id="go" aria-label="Start this plan"><svg viewBox="0 0 28 28"><path class="ar" d="M4 14h20M16 6l8 8-8 8"/><rect class="st" x="7" y="7" width="14" height="14"/></svg><span class="nm" id="goLbl">Start</span></button></span>
   </div>
     <div class="read" id="read">Tap a colored word, or press A F B T S. Enter starts.</div>
 </div>
