@@ -310,8 +310,8 @@ function makeTrig(slot){
 }
 /* the start slot reserves the width of its open label, so the line wraps for it and hover always grows rightward */
 function reserveGo(){const go=$('#go'),slot=go.parentElement,was=go.classList.contains('armed');
-  go.style.transition='none';go.classList.add('armed');const w=go.offsetWidth;if(!was)go.classList.remove('armed');
-  void go.offsetWidth;go.style.transition='';slot.style.width=w+'px'}
+  const nm=go.querySelector('.nm');go.style.transition=nm.style.transition='none';go.classList.add('armed');
+  const w=go.offsetWidth;if(!was)go.classList.remove('armed');void go.offsetWidth;go.style.transition=nm.style.transition='';slot.style.width=w+'px'}
 function render(k,animate=true){
   const b=$(`.slot[data-k="${k}"] .trig`),d=M[k];
   if(d.timed)b.style.width=W(d.sel)+'px';
