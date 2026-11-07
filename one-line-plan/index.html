@@ -179,11 +179,11 @@ body{background:#121212;color:var(--cream);font-family:var(--font);font-weight:3
     <div class="sp">
       <h3>States</h3>
       <div class="states">
-        <figure><span class="sh mini">__S{G.read}<span>read</span></span><figcaption>Default</figcaption></figure>
-        <figure><span class="sh mini hov">__S{G.read}<span>read</span></span><figcaption>Hover · square, icon turns 90°</figcaption></figure>
-        <figure><span class="sh mini prs">__S{G.read}<span>read</span></span><figcaption>Pressed · squash to 88%</figcaption></figure>
-        <figure><span class="sh mini sel">__S{G.read}<span>read</span></span><figcaption>Selected · square</figcaption></figure>
-        <figure><span class="sh mini opn">__S{G.read}<span>read</span></span><figcaption>Open trigger · flat bottom</figcaption></figure>
+        <figure><span class="sh mini">__S{G.code}<span>code</span></span><figcaption>Default</figcaption></figure>
+        <figure><span class="sh mini hov">__S{G.code}<span>code</span></span><figcaption>Hover · square, icon turns 90°</figcaption></figure>
+        <figure><span class="sh mini prs">__S{G.code}<span>code</span></span><figcaption>Pressed · squash to 88%</figcaption></figure>
+        <figure><span class="sh mini sel">__S{G.code}<span>code</span></span><figcaption>Selected · square</figcaption></figure>
+        <figure><span class="sh mini opn">__S{G.code}<span>code</span></span><figcaption>Open trigger · flat bottom</figcaption></figure>
       </div>
     </div>
     <div class="sp">
@@ -256,7 +256,7 @@ const G={
   more:Ln('<path d="M9 5l7 7-7 7"/>')                                          // line: opens the next level
 };
 const M={
-  act:{c:'--lemon',sel:'read',opts:[['read','read'],['write','write'],['draw','draw'],['code','code'],['study','study']]},
+  act:{c:'--lemon',sel:'code',opts:[['read','read'],['write','write'],['draw','draw'],['code','code'],['study','study']]},
   focus:{c:'--lilac',sel:45,timed:true,opts:[[15,'15 min'],[30,'30 min'],[45,'45 min'],[60,'60 min']]},
   rest:{c:'--tang',sel:'walk',opts:[['walk','take a walk'],['stretch','stretch'],['snack','grab a snack'],['nap','nap']]},
   brk:{c:'--amber',sel:10,timed:true,opts:[[5,'5 min'],[10,'10 min'],[15,'15 min']]},
