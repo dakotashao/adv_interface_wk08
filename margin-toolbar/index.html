@@ -203,18 +203,19 @@ svg.g{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-widt
 /* the Pencil quick switch: the ring, a white sheet runs with the hand */
 .ring{position:absolute;left:0;top:0;width:0;height:0;z-index:5;pointer-events:none}
 .ring>svg{position:absolute;left:-90px;top:-90px;width:180px;height:180px;overflow:visible}
-.ring .arc{fill:none;stroke:var(--paper);stroke-width:24;filter:drop-shadow(0 1px 2px rgba(60,50,30,.08)) drop-shadow(0 8px 18px rgba(60,50,30,.12));stroke-linecap:round;opacity:0;transform-origin:90px 90px;transform:scale(.82);transition:opacity .4s var(--calm),transform .55s var(--calm)}
+.ring .arc{fill:none;stroke:var(--paper);stroke-width:24;filter:drop-shadow(0 1px 2px rgba(60,50,30,.08)) drop-shadow(0 8px 18px rgba(60,50,30,.12));stroke-linecap:round;opacity:0;transform-origin:90px 90px;transform:scale(.82);transition:opacity .22s var(--calm),transform .32s var(--calm)}
 .ring.on .arc{opacity:1;transform:none}
 .ring .sheet{fill:none;stroke:#fff;stroke-width:24;stroke-linecap:round;filter:drop-shadow(0 1px 2px rgba(60,50,30,.08)) drop-shadow(0 10px 22px rgba(60,50,30,.18));opacity:0;transition:opacity .3s var(--calm)}
 .ring .sheet.on{opacity:1}
-.ring .ic{position:absolute;width:16px;height:16px;margin:-8px 0 0 -8px;color:#b3ada2;opacity:0;transition:opacity .4s var(--calm),color .3s var(--calm)}
+.ring .ic{position:absolute;width:16px;height:16px;margin:-8px 0 0 -8px;color:#b3ada2;opacity:0;transition:opacity .22s var(--calm),color .3s var(--calm)}
 .ring.on .ic{opacity:1}
 .ring .ic.aim{color:var(--ink)}
 .ring .ic svg{width:16px;height:16px}
 .ring .nm{position:absolute;font:400 13px/1 var(--f);color:var(--ink);white-space:nowrap;opacity:0;filter:blur(2px);transition:opacity .25s var(--calm),filter .25s var(--calm)}
 .ring .nm.on{opacity:1;filter:none}
-.ring.closing .arc,.ring.closing .ic:not(.aim){opacity:0}
-.chip{position:absolute;z-index:5;font:400 13px/1 var(--f);color:var(--ink);background:#fff;border-radius:13px;padding:9px 12px;box-shadow:0 1px 2px rgba(60,50,30,.06),0 10px 24px rgba(60,50,30,.12);pointer-events:none;transform:translate(14px,-150%);animation:chip 1.3s var(--calm) forwards}
+.ring.closing .arc,.ring.closing .ic:not(.aim),.ring.closing .nm{opacity:0;transition-duration:.16s}
+.ring.closing .sheet,.ring.closing .ic{opacity:0;transition:opacity .22s var(--calm) .06s}
+.chip{position:absolute;z-index:5;font:400 13px/1 var(--f);color:var(--ink);background:#fff;border-radius:13px;padding:9px 12px;box-shadow:0 1px 2px rgba(60,50,30,.06),0 10px 24px rgba(60,50,30,.12);pointer-events:none;transform:translate(14px,-150%);animation:chip .8s var(--calm) forwards}
 @keyframes chip{0%{opacity:0;filter:blur(3px)}20%,70%{opacity:1;filter:none}100%{opacity:0}}
 .hint{display:none;position:absolute;left:28px;bottom:18px;z-index:3;font:400 12px/1.4 var(--f);color:var(--soft);pointer-events:none}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
@@ -534,8 +535,8 @@ function moveRing(p){const g=ring,dx=p.x-g.c.x,dy=p.y-g.c.y,dist=Math.hypot(dx,d
   g.L.querySelectorAll('.ic').forEach(e=>e.classList.toggle('aim',e.dataset.d===g.aim));
   const nm=g.L.querySelector('.nm');if(g.aim){const a=rad(ANG[g.aim]),r=R+20;nm.textContent=NAMES[MAP[g.aim]];nm.style.left=Math.cos(a)*r+'px';nm.style.top=Math.sin(a)*r+'px';nm.style.transform={up:'translate(-50%,-100%)',down:'translate(-50%,0)',left:'translate(-100%,-50%)',right:'translate(0,-50%)'}[g.aim];nm.classList.add('on')}else nm.classList.remove('on')}
 function ringStep(){if(!ring||!ring.s.init)return;const s=ring.s,fw=s.t1>s.a1,bw=s.t0<s.a0;s.a1+=(s.t1-s.a1)*(fw?.24:.12);s.a0+=(s.t0-s.a0)*(bw?.24:.12);ring.L.querySelector('.sheet').setAttribute('d',arcD(s.a0,Math.max(s.a1,s.a0+.01)))}
-function closeRing(instant){if(!ring)return;const g=ring;ring=null;if(g.aim&&!instant){setTool(MAP[g.aim]);chip(g.c,NAMES[MAP[g.aim]])}
-  g.L.classList.add('closing');setTimeout(()=>{g.L.classList.remove('on');setTimeout(()=>g.L.remove(),450)},instant?0:240)}
+function closeRing(instant){if(!ring)return;const g=ring;ring=null;if(g.aim&&!instant)setTool(MAP[g.aim]);
+  g.L.classList.add('closing');setTimeout(()=>g.L.remove(),instant?0:320)}
 function chip(p,t){const c=document.createElement('div');c.className='chip';c.textContent=t;c.style.left=p.x+'px';c.style.top=p.y+'px';screen.append(c);setTimeout(()=>c.remove(),1400)}
 
 /* ---- the Pencil on the page ---- */
@@ -545,7 +546,7 @@ doc.addEventListener('pointerdown',e=>{if(e.pointerType==='touch')return;e.preve
   const sp=local(e,screen),dp=local(e,doc);resetAsk();
   if(e.button===2){openRing(sp);act={kind:'ring'};return}
   act={kind:tool,start:sp,startD:dp,moved:false,pts:[dp],caret:caretAt(e.clientX,e.clientY),
-    hold:setTimeout(()=>{if(!act||act.moved)return;if(act.path)act.path.remove();CSS.highlights&&CSS.highlights.delete('preview');openRing(act.start);act={kind:'ring'}},320)};
+    hold:setTimeout(()=>{if(!act||act.moved)return;if(act.path)act.path.remove();CSS.highlights&&CSS.highlights.delete('preview');openRing(act.start);act={kind:'ring'}},240)};
   if(tool==='er')eraseAt(e,dp)});
 doc.addEventListener('pointermove',e=>{if(!act)return;const sp=local(e,screen),dp=local(e,doc);
   if(act.kind==='ring'){moveRing(sp);return}
