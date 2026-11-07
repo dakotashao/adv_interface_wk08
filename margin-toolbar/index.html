@@ -156,7 +156,7 @@ svg.ink path.pencil{opacity:.72}
 .grip{position:absolute;right:6px;top:50%;width:4px;height:22px;margin-top:-11px;border-radius:2px;background:#fff;box-shadow:0 1px 3px rgba(60,50,30,.18);opacity:0;transition:opacity .4s var(--calm),transform .4s var(--calm);pointer-events:none}
 .tb:hover .grip,.tb.sizing .grip{opacity:1}
 .tb.sizing .grip{transform:scaleY(1.25)}
-.tb[data-side="left"] .grip,.tb[data-side="right"] .grip{right:auto;top:auto;left:50%;bottom:6px;width:22px;height:4px;margin:0 0 0 -11px}
+.tb[data-side="right"] .grip{right:auto;left:6px}
 .tb[data-size="ring"] .grip,.tb[data-size="sub"] .grip{display:none}
 .curt{display:none}
 .tb[data-size="sub"] .tools{display:none}
@@ -378,25 +378,25 @@ function renderRing(){const items=[];
     b.innerHTML=it.col?`<i style="--c:${it.col}"></i>`:svgI(it.ic);b.setAttribute('aria-label',it.col?'Colour':it.ic);
     b.addEventListener('pointerdown',e=>e.stopPropagation());b.onclick=e=>{e.stopPropagation();it.act(b)};rg.append(b)});
   const c=document.createElement('button');c.className='rc';c.innerHTML=svgI(tool);c.setAttribute('aria-label','Change tool');rg.append(c)}
-function toRing(){tb.classList.remove('sizing');tb.style.width=tb.style.height='';const L=tb.offsetLeft,T=tb.offsetTop;
-  st.size='ring';tb.dataset.size='ring';picker=false;rgKey='';renderRing();st.ax=L+80;st.ay=T+80;st.fx=st.ax;st.fy=st.ay;place()}
+function toRing(){tb.classList.remove('sizing');tb.style.width=tb.style.height='';const L=tb.offsetLeft,T=tb.offsetTop,CY=T+tb.offsetHeight/2;
+  st.size='ring';tb.dataset.size='ring';picker=false;rgKey='';renderRing();st.ax=L+80;st.ay=vert()?CY:T+80;st.fx=st.ax;st.fy=st.ay;place()}
 function fromRing(){const L=tb.offsetLeft,T=tb.offsetTop;st.size='compact';tb.dataset.size='compact';placeInd(true);
   if(vert())st.ay=T+tb.offsetHeight/2;else st.ax=L+tb.offsetWidth/2;st.fx=L+tb.offsetWidth/2;st.fy=T+tb.offsetHeight/2;place()}
-function edgeHit(p){if(st.size==='ring')return Math.hypot(p.x-80,p.y-80)>62;const w=tb.offsetWidth,h=tb.offsetHeight;return vert()?p.y>h-24:p.x>w-24}
-tb.addEventListener('pointermove',e=>{if(gesture)return;const p=local(e,tb);tb.style.cursor=edgeHit(p)?(st.size==='ring'?'nesw-resize':vert()?'ns-resize':'ew-resize'):'grab'});
+function edgeHit(p){if(st.size==='ring')return Math.hypot(p.x-80,p.y-80)>62;const w=tb.offsetWidth,h=tb.offsetHeight;return st.side==='right'?p.x<24:p.x>w-24}
+tb.addEventListener('pointermove',e=>{if(gesture)return;const p=local(e,tb);tb.style.cursor=edgeHit(p)?(st.size==='ring'?'nesw-resize':'ew-resize'):'grab'});
 tb.addEventListener('pointerdown',e=>{if(e.target.closest('.ro')||(e.target.closest('.sw,.ob')&&st.size!=='sub'))return;const p=local(e,tb);dragged=false;
   if(st.size==='ring'&&edgeHit(p)){tb.setPointerCapture(e.pointerId);gesture={kind:'grow',start:local(e,screen)};return}
   if(st.size==='ring'&&!e.target.closest('.rc'))return;
-  if(edgeHit(p)){tb.setPointerCapture(e.pointerId);const dim=vert()?'height':'width',cur=vert()?tb.offsetHeight:tb.offsetWidth;
+  if(edgeHit(p)){tb.setPointerCapture(e.pointerId);const dim='width',cur=tb.offsetWidth;
     // measure both sizes once
-    const keep=tb.dataset.size;tb.dataset.size='full';const full=vert()?tb.offsetHeight:tb.offsetWidth;tb.dataset.size='compact';const comp=vert()?tb.offsetHeight:tb.offsetWidth;tb.dataset.size=keep;
+    const keep=tb.dataset.size;tb.dataset.size='full';const full=tb.offsetWidth;tb.dataset.size='compact';const comp=tb.offsetWidth;tb.dataset.size=keep;
     gesture={kind:'size',dim,start:local(e,screen),cur,full,comp};tb.classList.add('sizing');tb.style[dim]=cur+'px';return}
   const sp=local(e,screen);gesture={kind:'move',start:sp,fx:p.x/tb.offsetWidth,fy:p.y/tb.offsetHeight,center:!!e.target.closest('.rc'),curt:!!e.target.closest('.curt'),size0:st.size==='sub'?'compact':st.size}});
 addEventListener('pointermove',e=>{if(!gesture)return;const sp=local(e,screen),g=gesture;
   if(g.kind==='done')return;
   if(g.kind==='grow'){if(Math.hypot(sp.x-g.start.x,sp.y-g.start.y)>34){fromRing();dragged=true;gesture={kind:'done'}}return}
-  if(g.kind==='size'){const d=vert()?sp.y-g.start.y:sp.x-g.start.x;let len=g.cur+d;if(len<g.comp*.72){toRing();dragged=true;gesture={kind:'done'};return}const lo=g.comp*.7,hi=g.full*1.06;len=len<g.comp?g.comp-(g.comp-len)*.5:len>g.full?g.full+(len-g.full)*.3:len;len=Math.max(lo,Math.min(hi,len));
-    tb.style[g.dim]=len+'px';const sz=len<(g.full+g.comp)/2?'compact':'full';if(sz!==st.size){st.size=sz;tb.dataset.size=sz}dragged=true;return}
+  if(g.kind==='size'){const d=st.side==='right'?g.start.x-sp.x:sp.x-g.start.x;let len=g.cur+d;if(len<g.comp*.72){toRing();dragged=true;gesture={kind:'done'};return}const lo=g.comp*.7,hi=g.full*1.06;len=len<g.comp?g.comp-(g.comp-len)*.5:len>g.full?g.full+(len-g.full)*.3:len;len=Math.max(lo,Math.min(hi,len));
+    tb.style[g.dim]=len+'px';if(st.side==='right')tb.style.left=(1194-18-len)+'px';const sz=len<(g.full+g.comp)/2?'compact':'full';if(sz!==st.size){st.size=sz;tb.dataset.size=sz}dragged=true;return}
   if(!dragged&&Math.hypot(sp.x-g.start.x,sp.y-g.start.y)<6)return;
   if(!dragged){dragged=true;tb.classList.add('drag');tb.setPointerCapture(e.pointerId)}
   setSide(sideFor(sp.x,sp.y));
@@ -409,7 +409,7 @@ function tbUp(e){if(!gesture)return;const g=gesture;gesture=null;zone.classList.
   if(g.kind==='done'||g.kind==='grow'){setTimeout(()=>dragged=false,0);return}
   if(g.kind==='move'&&g.center&&!dragged){picker=!picker;renderRing();return}
   if(g.kind==='size'){tb.classList.remove('sizing');const target=st.size==='full'?g.full:g.comp;tb.classList.add('settle');tb.style[g.dim]=target+'px';
-    if(vert())st.ay=tb.offsetTop+target/2;else st.ax=tb.offsetLeft+target/2;place();
+    if(vert())st.ay=tb.offsetTop+tb.offsetHeight/2;else st.ax=tb.offsetLeft+target/2;place();
     setTimeout(()=>{tb.classList.remove('settle');tb.style[g.dim]='';placeInd()},520);setTimeout(()=>dragged=false,0);return}
   tb.classList.remove('drag');
   if(dragged){const sp=local(e,screen);st.ax=sp.x-(g.fx-.5)*tb.offsetWidth;st.ay=sp.y-(g.fy-.5)*tb.offsetHeight;st.fx=st.ax;st.fy=st.ay;place();placeInd();setTimeout(()=>dragged=false,0)}}
