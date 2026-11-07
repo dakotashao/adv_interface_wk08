@@ -10,6 +10,7 @@ html,body{margin:0;background:#000;color:#fff;font-family:var(--f);-webkit-font-
 .cap{max-width:1194px;width:100%;font-size:13px;line-height:1.5;color:#77736d}
 .cap b{color:#fff;font-weight:400;margin-right:12px}
 .embed .read,.embed .specwrap{display:none}
+.wrap{min-height:100vh;box-sizing:border-box;justify-content:center}
 .embed .wrap{min-height:100vh;box-sizing:border-box;justify-content:center;padding:0}
 /* spec */
 .specwrap{width:min(1194px,100%);display:flex;flex-direction:column;align-items:flex-start;gap:12px;margin-top:8px}
@@ -215,12 +216,12 @@ svg.g{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-widt
 .ring.closing .arc,.ring.closing .ic:not(.aim){opacity:0}
 .chip{position:absolute;z-index:5;font:400 13px/1 var(--f);color:var(--ink);background:#fff;border-radius:13px;padding:9px 12px;box-shadow:0 1px 2px rgba(60,50,30,.06),0 10px 24px rgba(60,50,30,.12);pointer-events:none;transform:translate(14px,-150%);animation:chip 1.3s var(--calm) forwards}
 @keyframes chip{0%{opacity:0;filter:blur(3px)}20%,70%{opacity:1;filter:none}100%{opacity:0}}
-.hint{position:absolute;left:28px;bottom:18px;z-index:3;font:400 12px/1.4 var(--f);color:var(--soft);pointer-events:none}
+.hint{display:none;position:absolute;left:28px;bottom:18px;z-index:3;font:400 12px/1.4 var(--f);color:var(--soft);pointer-events:none}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style></head>
 <body>
 <div class="wrap">
-  <p class="cap read"><b>Reader · iPad</b>Draw with the mouse as the Pencil. Hold still for a moment, then slide, to switch tools (right-click is the squeeze). Press D for the Pencil double-tap. Turn pages with the arrows, ← → or a sideways swipe. Drag the toolbar anywhere: an edge makes it dock there, the middle lets it float. Drag its end to make it smaller or larger; keep going and it folds into the ring. Tap the ring’s centre to change tools, pull its outer edge to open it back into a bar. Docked bar pushed on into its edge keeps only the options (switch tools with the Pencil); tap the tool icon to bring the tools back.</p>
+  
   <div class="fit" id="fit">
     <div class="ipad" id="ipad"><div class="screen" id="screen">
       <span class="status">9:41</span><span class="status r">100%</span>
@@ -251,6 +252,7 @@ svg.g{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-widt
   <div class="specwrap">
     <button class="specbtn" id="specBtn" aria-expanded="false" aria-controls="spec">Spec</button>
     <section class="spec" id="spec" hidden>
+      <div><h3>How to use</h3><p>Draw with the mouse as the Pencil. Hold still for a moment, then slide, to switch tools; right-click is the squeeze, D is the double-tap. Turn pages with the arrows, ← → or a sideways swipe. Drag the toolbar anywhere; drag its end to resize it; push it on into its edge for options only.</p></div>
       <div><h3>Concept</h3><p>A reading toolbar for iPad and Apple Pencil, for books read together with friends. The bar holds the options of the tool in hand and is always visible; the Pencil switches tools in one gesture. Where you put the bar decides its direction, and how far you shrink it decides how much it says.</p></div>
       <div class="two">
         <div><h3>Tools and options</h3><table>
@@ -315,7 +317,7 @@ const doc=$('#doc'),ink=$('#ink'),tools=$('#tools'),ind=$('#ind'),opts=$('#opts'
 /* ---- fit the device to the window ---- */
 // inside a preview frame: no caption or spec, the whole iPad centred in view
 const EMBED=window.self!==window.top;if(EMBED)document.body.classList.add('embed');
-let S=1;function fit(){S=EMBED?Math.min((innerWidth-120)/1234,(innerHeight-120)/874):Math.min(1,(innerWidth-32)/1234);$('#ipad').style.transform=`scale(${S})`;$('#fit').style.width=1234*S+'px';$('#fit').style.height=874*S+'px'}
+let S=1;function fit(){S=EMBED?Math.min((innerWidth-120)/1234,(innerHeight-120)/874):Math.min(1,(innerWidth-48)/1234,(innerHeight-110)/874);$('#ipad').style.transform=`scale(${S})`;$('#fit').style.width=1234*S+'px';$('#fit').style.height=874*S+'px';{const sw=document.querySelector('.specwrap');if(sw)sw.style.width=Math.max(320,1234*S)+'px'}}
 fit();addEventListener('resize',()=>{fit();placeInd(true)});
 const local=(e,el)=>{const r=el.getBoundingClientRect();return{x:(e.clientX-r.left)/S,y:(e.clientY-r.top)/S}};
 
