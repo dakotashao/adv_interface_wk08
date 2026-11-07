@@ -93,7 +93,9 @@ body{background:#121212;color:var(--cream);font-family:var(--font);font-weight:3
 
 .trig.ticking .lk{display:none}
 
-.go{--c:var(--violet);--fg:#fff;width:auto;padding:0 15px;justify-content:center;gap:0;transition:padding .5s var(--spring),gap .5s var(--spring),transform .14s ease}
+.goslot{width:54px;height:54px;vertical-align:middle}
+.go{--c:var(--violet);--fg:#fff;position:absolute;left:0;top:0;z-index:4;width:auto;min-width:54px;padding:0 13px;justify-content:center;gap:0;transition:padding .5s var(--spring),gap .5s var(--spring),transform .14s ease}
+.go.flip{left:auto;right:0}
 .go.armed,.go.run{padding:0 24px 0 14px;gap:10px}
 .go svg{width:28px;height:28px;stroke:#fff;fill:none;stroke-width:1.2;flex:none;transition:transform .5s var(--spring)}
 .go .nm{font-size:22px;max-width:0;overflow:hidden;transition:max-width .55s var(--spring)}
@@ -373,8 +375,7 @@ document.addEventListener('keydown',e=>{
 /* run: each time shape shrinks smoothly into a circle, then disappears; the step in progress stays lit (demo: 1 s = 1 min) */
 $('#go').onclick=e=>{e.stopPropagation();close();
   if(running)return stop();
-  /* first click opens the summary, second click starts */
-  if(!$('#go').classList.contains('armed')){$('#go').classList.add('armed');return}
+
   const steps=[['focus','act'],['brk','rest']];let i=0;
   const begin=()=>{const [k,a]=steps[i],b=$(`.slot[data-k="${k}"] .trig`);
     $$('.slot').forEach(s=>s.classList.remove('active'));
@@ -407,6 +408,13 @@ function stop(){clearInterval(running);running=null;$('#go').classList.remove('r
 function scale(){const w=$('#line').clientWidth;u=Math.max(1.6,Math.min(4.5,(w-260)/80));
   ['focus','brk'].forEach(k=>$(`.slot[data-k="${k}"] .trig`).style.width=W(M[k].sel)+'px')}
 $$('.slot[data-k]').forEach(makeTrig);
+/* start: one circle in the sentence; on hover the label grows over the page, away from the edge, without moving anything */
+{const go=$('#go');go.parentElement.classList.add('goslot');
+  const grow=()=>{const sr=$('#stage').getBoundingClientRect(),gr=go.parentElement.getBoundingClientRect();
+    go.classList.toggle('flip',sr.right-gr.left<300);go.classList.add('armed')};
+  const shrink=()=>{if(!running)go.classList.remove('armed')};
+  go.addEventListener('mouseenter',grow);go.addEventListener('focus',grow);
+  go.addEventListener('mouseleave',shrink);go.addEventListener('blur',shrink);}
 /* spec: fill in icons and toggle */
 $('#spec').innerHTML=$('#spec').innerHTML.replace(/__S\{G\.(\w+)\}/g,(_,n)=>G[n]);
 $('#specBtn').onclick=e=>{e.stopPropagation();const o=$('#spec').hidden;$('#spec').hidden=!o;$('#specBtn').setAttribute('aria-expanded',o);
