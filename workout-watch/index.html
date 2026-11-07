@@ -2305,7 +2305,13 @@ function makePanel(pan,o){let pf=0;
     Object.assign(ind.style,K(t));last=t}
   function fo(i){const n=nav(),prev=pan.querySelector('[data-k].on');pf=Math.max(0,Math.min(n.length-1,i));pan.querySelectorAll('[data-k]').forEach(el=>el.classList.toggle('on',el===n[pf]));
     if(o.exitOut&&prev&&prev!==n[pf]){prev.classList.add('out');clearTimeout(prev.ot);prev.ot=setTimeout(()=>{prev.style.setProperty('--nt','none');prev.classList.remove('out');prev.offsetWidth;prev.style.removeProperty('--nt')},430)}const el=n[pf];if(el){reveal(el);moveInd(el);setTimeout(()=>{reveal(el);if(n[pf]===el||nav()[pf]===el)moveInd(el,1)},430);preview(el)}}
-  function reveal(el){if(o.center){const r=el.getBoundingClientRect(),pr=pan.getBoundingClientRect();pan.scrollTo({top:pan.scrollTop+(r.top+r.height/2)-(pr.top+pr.height/2),behavior:'smooth'});return}
+  let cBlk=null,cH=0;
+  function reveal(el){if(o.center){
+      // keep one section in the middle: Effort, Goal, Mode or Start. Moving inside a section does not scroll
+      const blk=topOf(el)||el.closest('.dg-tiles')||el,pr=pan.getBoundingClientRect(),r=blk.getBoundingClientRect();
+      if(blk===cBlk&&Math.abs(r.height-cH)<2)return;cBlk=blk;cH=r.height;
+      if(r.height>pr.height*.86){const e=el.getBoundingClientRect();if(e.bottom>pr.bottom-20)pan.scrollBy({top:e.bottom-pr.bottom+40,behavior:'smooth'});else if(r.top<pr.top)pan.scrollBy({top:r.top-pr.top-10,behavior:'smooth'});return}
+      pan.scrollTo({top:pan.scrollTop+(r.top+r.height/2)-(pr.top+pr.height/2),behavior:'smooth'});return}
     const r=el.getBoundingClientRect(),pr=pan.getBoundingClientRect();if(r.bottom>pr.bottom-6)pan.scrollBy({top:r.bottom-pr.bottom+16,behavior:'smooth'});else if(r.top<pr.top+6)pan.scrollBy({top:r.top-pr.top-16,behavior:'smooth'})}
   const foEl=el=>{const i=nav().indexOf(el);if(i>=0)fo(i)};
   // what the figure on the left shows: the focused option if it has one, otherwise the current choice
@@ -2351,7 +2357,7 @@ function makePanel(pan,o){let pf=0;
     if(k==='Enter'||k===' '){cur&&cur.classList.add('pr');setTimeout(()=>{cur&&cur.classList.remove('pr');act(cur)},110);return true}
     if(k==='Escape'||k==='Backspace')return closeInner();
     return false}
-  return{build,upd,setGhost,closeInner,key,actCur:()=>act(nav()[pf]),clear:()=>{pan.innerHTML='';gId=null;ind=null;last=null}}}
+  return{build,upd,setGhost,closeInner,key,actCur:()=>act(nav()[pf]),clear:()=>{pan.innerHTML='';gId=null;ind=null;last=null;cBlk=null}}}
 function makeGame(st){
   const tone=st.dataset.tone||'D',acOf=id=>tone==='D'?DPC[id]:BPAL[id].c[0],SW=ac=>tone==='D'?swL(ac):'';
   const m=model(),ORDER=AGROUPS.flatMap(g=>g[1]).map(byId);
