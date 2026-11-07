@@ -9,6 +9,8 @@ html,body{margin:0;background:#000;color:#fff;font-family:var(--f);-webkit-font-
 .wrap{padding:28px 16px 40px;display:flex;flex-direction:column;align-items:center;gap:16px}
 .cap{max-width:1194px;width:100%;font-size:13px;line-height:1.5;color:#77736d}
 .cap b{color:#fff;font-weight:400;margin-right:12px}
+.embed .read,.embed .specwrap{display:none}
+.embed .wrap{min-height:100vh;box-sizing:border-box;justify-content:center;padding:0}
 /* spec */
 .specwrap{width:min(1194px,100%);display:flex;flex-direction:column;align-items:flex-start;gap:12px;margin-top:8px}
 .specbtn{font:400 14px var(--f);color:#f1f0ed;background:none;border:1px solid #f1f0ed;border-radius:999px;padding:8px 18px;cursor:pointer;transition:background .4s var(--calm),color .4s var(--calm)}
@@ -311,7 +313,9 @@ let tool='pen',prevTool='pen',ring=null;const SHS=new Set(),SHM={};
 const doc=$('#doc'),ink=$('#ink'),tools=$('#tools'),ind=$('#ind'),opts=$('#opts'),screen=$('#screen'),scroll=$('#scroll'),hint=$('#hint'),tb=$('#tb'),zone=$('#zone');
 
 /* ---- fit the device to the window ---- */
-let S=1;function fit(){S=Math.min(1,(innerWidth-32)/1234);$('#ipad').style.transform=`scale(${S})`;$('#fit').style.width=1234*S+'px';$('#fit').style.height=874*S+'px'}
+// inside a preview frame: no caption or spec, the whole iPad centred in view
+const EMBED=window.self!==window.top;if(EMBED)document.body.classList.add('embed');
+let S=1;function fit(){S=EMBED?Math.min((innerWidth-120)/1234,(innerHeight-120)/874):Math.min(1,(innerWidth-32)/1234);$('#ipad').style.transform=`scale(${S})`;$('#fit').style.width=1234*S+'px';$('#fit').style.height=874*S+'px'}
 fit();addEventListener('resize',()=>{fit();placeInd(true)});
 const local=(e,el)=>{const r=el.getBoundingClientRect();return{x:(e.clientX-r.left)/S,y:(e.clientY-r.top)/S}};
 
