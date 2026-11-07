@@ -194,7 +194,7 @@ body{background:#121212;color:var(--cream);font-family:var(--font);font-weight:3
         <li><b>One sentence is the menu.</b> White words are fixed; each colored word is a trigger that drops its own list.</li>
         <li><b>Length is time.</b> Both time words share one scale: width grows from 125&thinsp;px to a fixed 204&thinsp;px cap at 45 min; 60 min stays that long, so 30 min sits halfway. Time moves in 5-minute steps.</li>
         <li><b>Square corners mean selected.</b> Hover squares an option as a preview; the open trigger flattens its bottom so the list hangs from it.</li>
-        <li><b>Color is category.</b> Each word has its own color; in sound, blue is nature, green is scene, lilac picks directly.</li>
+        <li><b>Color is category.</b> Each word has its own color; in sound, blue is nature, green is scene, cream picks directly.</li>
         <li><b>Solid and line alternate.</b> Icons inside one list switch between a solid shape and a thin line, like the reference.</li>
       </ul>
     </div>
@@ -232,7 +232,8 @@ body{background:#121212;color:var(--cream);font-family:var(--font);font-weight:3
     <div class="sp two">
       <div><h3>Color</h3><div class="sw">
         <i style="background:var(--lemon)"></i><span>Activity #EAEA00</span>
-        <i style="background:var(--lilac)"></i><span>Focus · Plain #DCCBF7</span>
+        <i style="background:var(--lilac)"></i><span>Focus #DCCBF7</span>
+        <i style="background:var(--cream)"></i><span>Plain sounds #F5F0E8</span>
         <i style="background:var(--tang)"></i><span>Break #FF5C0F</span>
         <i style="background:var(--amber)"></i><span>Break time #FFA800</span>
         <i style="background:var(--cobalt)"></i><span>Nature #4A63E8</span>
@@ -293,7 +294,7 @@ const KEY={act:'A',focus:'F',rest:'B',brk:'T',sound:'S'};
 /* badge: a small dot marks what you used last time */
 /* sound groups get their own colors, like the blocks in the reference */
 const CC={nature:'--cobalt',scene:'--green'};
-const SC={rain:'--cobalt',ocean:'--cobalt',cafe:'--green',library:'--green',noise:'--lilac',none:'--lilac',birds:'--cobalt',thunder:'--cobalt',train:'--green',fire:'--green'};
+const SC={rain:'--cobalt',ocean:'--cobalt',cafe:'--green',library:'--green',noise:'--cream',none:'--cream',birds:'--cobalt',thunder:'--cobalt',train:'--green',fire:'--green'};
 const colorOf=(k,v)=>k==='sound'?[SC[v],SC[v]==='--cobalt'?'#fff':'var(--ink)']:[M[k].c,M[k].fg||'var(--ink)'];
 let last={act:'write',focus:30,rest:'walk',brk:5,sound:'cafe'};
 let u=3, open=null, running=null;
