@@ -170,7 +170,7 @@ body{background:#121212;color:var(--cream);font-family:var(--font);font-weight:3
       <h3>Rules</h3>
       <ul>
         <li><b>One sentence is the menu.</b> White words are fixed; each colored word is a trigger that drops its own list.</li>
-        <li><b>Length is time.</b> A time word is 150&thinsp;px plus a fixed width per minute, so 30 min is visibly half of 60.</li>
+        <li><b>Length is time.</b> Both time words share one scale: width grows from 120&thinsp;px to a 260&thinsp;px cap at 60 min, so 30 min sits halfway. Time moves in 5-minute steps.</li>
         <li><b>Square corners mean selected.</b> Hover squares an option as a preview; the open trigger flattens its bottom so the list hangs from it.</li>
         <li><b>Color is category.</b> Each word has its own color; in sound, blue is nature, green is scene, lilac picks directly.</li>
         <li><b>Solid and line alternate.</b> Icons inside one list switch between a solid shape and a thin line, like the reference.</li>
@@ -197,7 +197,7 @@ body{background:#121212;color:var(--cream);font-family:var(--font);font-weight:3
       <div><h3>Shortcuts</h3>
         <table><tr><td>A F B T S</td><td>Open activity, focus, break, break time, sound</td></tr>
         <tr><td>1–9</td><td>Pick in the open list</td></tr>
-        <tr><td>← →</td><td>Focus ±5 min, break ±1 min</td></tr>
+        <tr><td>← →</td><td>±5 min on focus or break</td></tr>
         <tr><td>↑ ↓</td><td>Move in the open list</td></tr>
         <tr><td>Esc</td><td>Close</td></tr>
         <tr><td>Enter</td><td>Start, pause, continue</td></tr></table></div>
@@ -259,7 +259,7 @@ const M={
   act:{c:'--lemon',sel:'code',opts:[['read','read'],['write','write'],['draw','draw'],['code','code'],['study','study']]},
   focus:{c:'--lilac',sel:45,timed:true,opts:[[15,'15 min'],[30,'30 min'],[45,'45 min'],[60,'60 min']]},
   rest:{c:'--tang',sel:'walk',opts:[['walk','take a walk'],['stretch','stretch'],['snack','grab a snack'],['nap','nap']]},
-  brk:{c:'--amber',sel:10,timed:true,opts:[[5,'5 min'],[10,'10 min'],[15,'15 min']]},
+  brk:{c:'--amber',sel:10,timed:true,opts:[[5,'5 min'],[10,'10 min'],[15,'15 min'],[30,'30 min']]},
   sound:{c:'--cobalt',fg:'#fff',sel:'rain',
     opts:[['rain','rain'],['ocean','ocean waves'],['cafe','café'],['library','library'],['noise','white noise'],['none','silence'],['birds','birds'],['thunder','thunder'],['train','train'],['fire','fireplace']],
     /* first level: two categories that open, then two sounds you pick directly */
@@ -274,14 +274,16 @@ const SC={rain:'--cobalt',ocean:'--cobalt',cafe:'--green',library:'--green',nois
 const colorOf=(k,v)=>k==='sound'?[SC[v],SC[v]==='--cobalt'?'#fff':'var(--ink)']:[M[k].c,M[k].fg||'var(--ink)'];
 let last={act:'write',focus:30,rest:'stretch',brk:5,sound:'cafe'};
 let u=3, open=null, running=null;
-const W=m=>Math.min(Math.round(150+m*u),($('#line')?.clientWidth||900)-20);   // 150px holds the label; the rest grows with minutes
+/* one scale for both time words: 0 min = 120px (just fits the label), 60 min = 260px (the cap) */
+const WMIN=120,WMAX=260;
+const W=m=>Math.round(WMIN+(Math.min(WMAX,($('#line')?.clientWidth||900)-20)-WMIN)*Math.min(m,60)/60);
 /* ruler: one tick per 5 min, a tall one every 15 */
 const ticks=m=>Array.from({length:Math.ceil(m/5)},(_,i)=>`<i${(i+1)%3===0?' class="q"':''}></i>`).join('');
 function setTicks(b,n){const T=b.querySelector('.ticks'),live=[...T.children].filter(x=>!x.classList.contains('out'));
   live.slice(n).forEach(x=>{x.classList.add('out');setTimeout(()=>x.remove(),350)})}
 const label=(k,v)=>M[k].timed?`${v} min`:M[k].opts.find(o=>o[0]===v)[1];
 /* fine-tune with ← →: step and range per time word */
-const FINE={focus:{step:5,min:5,max:120},brk:{step:1,min:1,max:30}};
+const FINE={focus:{step:5,min:5,max:60},brk:{step:5,min:5,max:30}};   /* same 5-min unit everywhere */
 
 const timers=new WeakMap();
 function typeTo(el,target){
@@ -347,7 +349,7 @@ function openList(k){
   L.hidden=false;slot.querySelector('.trig').setAttribute('aria-expanded','true');
   L.style.left='0px';const sr=$('#stage').getBoundingClientRect(),lr=L.getBoundingClientRect();
   if(lr.right>sr.right-16)L.style.left=(sr.right-16-lr.right)+'px';
-  $('#read').textContent=(d.timed?(k==='focus'?'← → adds or removes 5 min · ':'← → adds or removes 1 min · '):'')+'Square = your choice · press a number to pick, Esc to close.';
+  $('#read').textContent=(d.timed?'← → adds or removes 5 min · ':'')+'Square = your choice · press a number to pick, Esc to close.';
 }
 function close(){if(!open)return;const s=$(`.slot[data-k="${open}"]`);s.querySelector('.list').hidden=true;
   s.querySelector('.trig').setAttribute('aria-expanded','false');open=null;if(!running)$('#read').textContent='Tap a colored word, or press A F B T S. Enter starts.'}
@@ -419,7 +421,7 @@ function stop(){clearInterval(running);running=null;RS=null;$('#go').classList.r
   $$('.trig').forEach(b=>b.classList.remove('gone','ticking'));
   render('focus');render('brk');$('#read').textContent='Tap a colored word, or press A F B T S. Enter starts.'}
 
-function scale(){const w=$('#line').clientWidth;u=Math.max(1.6,Math.min(4.5,(w-260)/80));
+function scale(){
   ['focus','brk'].forEach(k=>$(`.slot[data-k="${k}"] .trig`).style.width=W(M[k].sel)+'px')}
 $$('.slot[data-k]').forEach(makeTrig);
 /* start: one circle in the sentence; on hover the label grows over the page, away from the edge, without moving anything */
