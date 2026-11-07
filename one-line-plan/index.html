@@ -271,7 +271,7 @@ const M={
   act:{c:'--lemon',sel:'code',opts:[['read','read'],['write','write'],['draw','draw'],['code','code'],['study','study']]},
   focus:{c:'--lilac',sel:45,timed:true,opts:[[15,'15 min'],[30,'30 min'],[45,'45 min'],[60,'60 min']]},
   rest:{c:'--tang',sel:'walk',opts:[['walk','take a walk'],['stretch','stretch'],['snack','grab a snack'],['nap','nap']]},
-  brk:{c:'--amber',sel:10,timed:true,opts:[[5,'5 min'],[10,'10 min'],[15,'15 min'],[30,'30 min']]},
+  brk:{c:'--amber',sel:10,timed:true,opts:[[5,'5 min'],[10,'10 min'],[15,'15 min'],[20,'20 min']]},
   sound:{c:'--cobalt',fg:'#fff',sel:'rain',
     opts:[['rain','rain'],['ocean','ocean waves'],['cafe','café'],['library','library'],['noise','white noise'],['none','silence'],['birds','birds'],['thunder','thunder'],['train','train'],['fire','fireplace']],
     /* first level: two categories that open, then two sounds you pick directly */
@@ -296,7 +296,7 @@ function setTicks(b,n){const T=b.querySelector('.ticks'),live=[...T.children].fi
   live.slice(n).forEach(x=>{x.classList.add('out');setTimeout(()=>x.remove(),350)})}
 const label=(k,v)=>M[k].timed?`${v} min`:M[k].opts.find(o=>o[0]===v)[1];
 /* fine-tune with ← →: step and range per time word */
-const FINE={focus:{step:5,min:5,max:60},brk:{step:5,min:5,max:30}};   /* same 5-min unit everywhere */
+const FINE={focus:{step:5,min:5,max:60},brk:{step:5,min:5,max:20}};   /* same 5-min unit everywhere */
 
 const timers=new WeakMap();
 function typeTo(el,target){
