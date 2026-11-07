@@ -117,15 +117,17 @@ body{margin:0;background:var(--ground);color:var(--ink);font:400 14px/1.45 var(-
 /* ---------- MENU SYSTEM: set into the column ---------- */
 .col.open .desc,.col.open .also{display:none}
 .menu{margin-top:2px}
-.page>*{will-change:clip-path}
-.page.wr>*{animation:wr .44s cubic-bezier(.25,.8,.25,1) both;animation-delay:calc(var(--i,0)*40ms)}
-.page.wl>*{animation:wl .44s cubic-bezier(.25,.8,.25,1) both;animation-delay:calc(var(--i,0)*40ms)}
-.page.er>*{animation:er .22s cubic-bezier(.55,0,.8,.3) both;animation-delay:calc(var(--i,0)*18ms)}
-.page.el>*{animation:el .22s cubic-bezier(.55,0,.8,.3) both;animation-delay:calc(var(--i,0)*18ms)}
-@keyframes wr{from{clip-path:inset(-2px 100% -2px 0)}to{clip-path:inset(-2px 0 -2px 0)}}
-@keyframes wl{from{clip-path:inset(-2px 0 -2px 100%)}to{clip-path:inset(-2px 0 -2px 0)}}
-@keyframes er{from{clip-path:inset(-2px 0 -2px 0)}to{clip-path:inset(-2px 0 -2px 100%)}}
-@keyframes el{from{clip-path:inset(-2px 0 -2px 0)}to{clip-path:inset(-2px 100% -2px 0)}}
+/* rows: the rule is drawn, then the words soak in letter by letter (ink on paper) */
+.item{border-bottom-color:transparent}
+.item::before{content:"";position:absolute;left:0;right:0;bottom:-1px;height:1px;background:var(--rule);transform-origin:left}
+.page.wl .item::before{transform-origin:right}
+.page.wr .item::before,.page.wl .item::before{animation:line .6s cubic-bezier(.25,.8,.25,1) both;animation-delay:calc(var(--i,0)*60ms)}
+@keyframes line{from{transform:scaleX(0)}}
+.page.wr .lead,.page.wr .trail,.page.wl .lead,.page.wl .trail{animation:soak .8s ease-out both;animation-delay:calc(var(--i,0)*60ms + 260ms)}
+@keyframes soak{from{opacity:0;filter:blur(4px)}}
+.page.er>*,.page.el>*{animation:dry .3s ease-in both;animation-delay:calc(var(--i,0)*22ms)}
+@keyframes dry{to{opacity:0;filter:blur(4px)}}
+.ch,.run{display:inline}
 .sec{display:flex;justify-content:space-between;padding:16px 0 6px;font-size:12.5px;color:var(--ink-2)}
 .divider{height:0;margin:4px 0}
 .back{display:flex;align-items:baseline;gap:8px;width:100%;padding:14px 0 8px;border:0;background:none;font:500 14px var(--ui);color:var(--ink);cursor:pointer;text-align:left}
@@ -306,8 +308,11 @@ function renderHero(f){
   else if(f.level==='stroke'){const n=d.n[f.stroke],s=SNAME[n]||['',''];
     ctx=`Stroke ${f.stroke+1} of ${d.s.length}`;h1=`<span class="zh">${n}</span>${cap1(s[0])}`;py=cap1(s[1]);desc=''}
   else{ctx='';h1=cap1(d.inf[1]);py=`<span class="zh">${d.k[0]}</span> + <span class="zh">${d.k[1]}</span> · ${P[2]}`;desc=zhs(d.ety)}
+  const key=[ctx,h1,py,desc,also.join()].join('|');if(key===renderHero.key)return;renderHero.key=key;
   $('ctx').innerHTML=ctx;$('def').innerHTML=h1;$('py').innerHTML=py;$('desc').innerHTML=desc;
   const a=$('also');a.innerHTML=also.length?'<span class="k">Also in</span>':'';
+  let t=ink(splitInk($('ctx')),0,14);t=ink(splitInk($('def')),60,34);ink(splitInk($('py')),260,12);ink(splitInk($('desc')),380,9);
+  setTimeout(()=>{a.querySelectorAll('button').forEach((b,i)=>ink([b],600+i*70,0))},0);ink(splitInk(a.querySelector('.k')||document.createElement('i')),520,14);
   also.forEach(([c,k])=>{const b=document.createElement('button');b.type='button';b.textContent=c;
     const pos=CH[c].k.indexOf(k)===0?1:0;b.onmouseenter=()=>preview(c,pos);b.onmouseleave=()=>preview(null);
     b.onclick=e=>{e.stopPropagation();closeMenu(true);go(c,null)};a.append(b)});
@@ -387,8 +392,19 @@ function page(items,sub){const p=document.createElement('div');p.className='page
     const b=document.createElement('button');b.type='button';b.className='item';b.setAttribute('role','menuitem');b._it=it;b.innerHTML=itemHTML(it);if(it.disabled)b.setAttribute('aria-disabled','true');p.append(b)}
   return p}
 function sync(){menu?.querySelectorAll('.item').forEach(b=>{if(b._it.sw)b.classList.toggle('on',b._it.sw())})}
+/* ink: split text into letters and let each one soak in, in reading order, a little unevenly */
+function splitInk(root){const out=[];const walk=n=>{for(const c of[...n.childNodes]){
+    if(c.nodeType===3){if(!c.nodeValue.trim())continue;const f=document.createElement('span');f.className='run';
+      for(const ch of c.nodeValue){if(ch===' '||ch==='\u00a0'){f.append(ch);continue}const s=document.createElement('span');s.className='ch';s.textContent=ch;f.append(s);out.push(s)}
+      c.replaceWith(f)}
+    else if(c.nodeType===1&&c.tagName!=='svg'&&!c.classList.contains('ch'))walk(c)}};walk(root);return out}
+const REDUCE=matchMedia('(prefers-reduced-motion: reduce)').matches;
+function ink(chs,base=0,step=16){if(REDUCE)return 0;let end=0;chs.forEach((c,i)=>{const dur=650+Math.random()*350,delay=base+i*step+Math.random()*90;
+    c.animate([{opacity:0,filter:'blur(5px)',color:'#b9b7b1'},{opacity:.55,filter:'blur(1.5px)',offset:.45},{opacity:1,filter:'blur(0)'}],{duration:dur,delay,easing:'cubic-bezier(.2,.6,.3,1)',fill:'backwards'});end=Math.max(end,dur+delay)});return end}
 function stagger(p,cls,rev){const kids=[...p.children];kids.forEach((k,i)=>k.style.setProperty('--i',rev?kids.length-1-i:i));
-  p.classList.remove('wr','wl','er','el');void p.offsetWidth;p.classList.add(cls);return(cls[0]==='w'?440+kids.length*40:220+kids.length*18)}
+  p.classList.remove('wr','wl','er','el');void p.offsetWidth;p.classList.add(cls);
+  if(cls[0]==='w'){let end=0;kids.forEach((k,i)=>{const chs=splitInk(k.querySelector('.label')||k);end=Math.max(end,ink(chs,i*60+120,14))});return end}
+  return 300+kids.length*22}
 function openMenu(){closeMenu(true);hov=null;menu=document.createElement('div');menu.className='menu';menu.setAttribute('role','menu');
   const t=$('trigger');stack=[page(itemsFor(pin))];menu.append(stack[0]);t.after(menu);$('col').classList.add('open');wire(menu);sync();stagger(stack[0],'wr');
   t.setAttribute('aria-expanded','true');paint()}
@@ -443,7 +459,7 @@ addEventListener('resize',fit);
 /* ================= spec ================= */
 $('spec').innerHTML=`<div class="tables"><div>
 <h3>Trigger</h3><table><tr><td>Row</td><td>full column · padding 0 0 12 · rule 1 #1C1C1A</td></tr><tr><td>Label</td><td>SF Pro 15 / 500 · target 15 #85837D</td></tr><tr><td>Caret</td><td>13 · open: Close, #C8432C, caret 180°</td></tr></table>
-<h3>Container</h3><table><tr><td>Width</td><td>column (284)</td></tr><tr><td>Fill · shadow</td><td>none · set into the column</td></tr><tr><td>Open</td><td>rows are written left → right like a 横 · clip reveal 440ms · 40ms apart</td></tr><tr><td>Close</td><td>rows are erased right → left, last row first · 220ms · 18ms apart</td></tr><tr><td>Submenu</td><td>forward: old rows erased, new rows written left → right · back: right → left</td></tr><tr><td>Trigger line</td><td>draws red left → right · 450ms</td></tr></table>
+<h3>Container</h3><table><tr><td>Width</td><td>column (284)</td></tr><tr><td>Fill · shadow</td><td>none · set into the column</td></tr><tr><td>Open</td><td>each rule is drawn left → right (600ms, 60ms apart), then its words soak in letter by letter like ink on paper: blur 5 → 0, #B9B7B1 → ink, 650–1000ms, 14ms apart, slightly uneven</td></tr><tr><td>Close</td><td>rows dry out, last row first · fade and blur 4 · 300ms · 22ms apart</td></tr><tr><td>Submenu</td><td>old rows dry out, new rows are drawn and soak in · back: rules drawn right → left</td></tr><tr><td>Text on the left</td><td>whenever the focus changes, the title, note and related characters soak in the same way, in reading order</td></tr><tr><td>Trigger line</td><td>draws red left → right · 450ms</td></tr></table>
 <h3>Section</h3><table><tr><td>Label</td><td>12.5 · #85837D · sentence case</td></tr><tr><td>Padding</td><td>16 0 6</td></tr></table>
 <h3>Practice sheet</h3><table><tr><td>Pinyin</td><td>four lines 440 × 84 · 50 · tap to hear</td></tr><tr><td>Grid</td><td>tian-zi 440 · dashed cross · #EFCFC7</td></tr><tr><td>Stroke order</td><td>44 boxes · gap 8 · newest stroke #C8432C</td></tr></table>
 </div><div>
