@@ -69,6 +69,7 @@ html,body{margin:0;background:#000;color:#fff;font-family:var(--f);-webkit-font-
 .with .who{display:flex;align-items:center;gap:6px;margin-right:12px;color:var(--mid)}
 .pg{position:absolute;bottom:34px;font:400 11.5px/1 var(--f);color:var(--soft);letter-spacing:.04em}
 .lp .pg{left:70px}
+.scroll{cursor:crosshair}
 .doc{position:relative;flex:none;height:100%;padding:150px 168px 74px 44px;column-width:333px;column-gap:212px;column-fill:auto;cursor:crosshair}
 .doc .pg{left:auto}
 .doc p{font:400 15.5px/1.72 var(--f);color:#2f2c27;margin:0;text-indent:1.6em}
@@ -541,14 +542,14 @@ function chip(p,t){const c=document.createElement('div');c.className='chip';c.te
 
 /* ---- the Pencil on the page ---- */
 let act=null;
-doc.addEventListener('contextmenu',e=>e.preventDefault());
-doc.addEventListener('pointerdown',e=>{if(e.pointerType==='touch')return;e.preventDefault();doc.setPointerCapture(e.pointerId);
+scroll.addEventListener('contextmenu',e=>e.preventDefault());
+scroll.addEventListener('pointerdown',e=>{if(e.pointerType==='touch'||e.target.closest('.turn,.note'))return;e.preventDefault();scroll.setPointerCapture(e.pointerId);
   const sp=local(e,screen),dp=local(e,doc);resetAsk();
   if(e.button===2){openRing(sp);act={kind:'ring'};return}
   act={kind:tool,start:sp,startD:dp,moved:false,pts:[dp],caret:caretAt(e.clientX,e.clientY),
     hold:setTimeout(()=>{if(!act||act.moved)return;if(act.path)act.path.remove();CSS.highlights&&CSS.highlights.delete('preview');openRing(act.start);act={kind:'ring'}},240)};
   if(tool==='er')eraseAt(e,dp)});
-doc.addEventListener('pointermove',e=>{if(!act)return;const sp=local(e,screen),dp=local(e,doc);
+scroll.addEventListener('pointermove',e=>{if(!act)return;const sp=local(e,screen),dp=local(e,doc);
   if(act.kind==='ring'){moveRing(sp);return}
   if(!act.moved&&Math.hypot(sp.x-act.start.x,sp.y-act.start.y)>5){act.moved=true;clearTimeout(act.hold)}
   if(!act.moved)return;
@@ -560,7 +561,7 @@ function up(e){if(!act)return;const a=act;act=null;clearTimeout(a.hold);
   if(a.kind==='ring'){closeRing();return}
   if(a.kind==='hl'){CSS.highlights&&CSS.highlights.delete('preview');if(a.range&&!a.range.collapsed)wrap(a.range)}
   if(a.kind==='cm'&&!a.moved)addNote(a.startD,a.caret)}
-doc.addEventListener('pointerup',up);doc.addEventListener('pointercancel',up);
+scroll.addEventListener('pointerup',up);scroll.addEventListener('pointercancel',up);
 // Pencil double-tap: eraser and back
 addEventListener('keydown',e=>{if(e.key.toLowerCase()!=='d'||e.target.isContentEditable||e.target.closest('textarea'))return;const k=tool==='er'?(prevTool==='er'?'pen':prevTool):'er';setTool(k);const r=screen.getBoundingClientRect();chip({x:screen.clientWidth/2-40,y:120},NAMES[k])});
 
