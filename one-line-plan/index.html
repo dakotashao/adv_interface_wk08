@@ -21,12 +21,13 @@ body{background:#121212;color:var(--cream);font-family:var(--font);font-weight:3
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
   display:grid;place-items:center;align-content:center}
 .stage{position:relative;width:min(900px,100%);min-height:580px;background:var(--ground);overflow:hidden;
-  padding:72px clamp(20px,5vw,64px) 40px;margin-block:16px}
+  padding:72px clamp(20px,5vw,44px) 40px;margin-block:16px}
 
 .line{position:relative;z-index:2;font-size:clamp(26px,4.2vw,40px);line-height:1;letter-spacing:-.015em;
   display:flex;flex-wrap:wrap;align-items:center;column-gap:14px;row-gap:18px;max-width:100%}
 .word{white-space:nowrap}
-.slot{position:relative;display:inline-block}
+.slot{position:relative;display:inline-flex;align-items:baseline}
+.cm{margin-left:4px;white-space:nowrap}
 
 .sh{--c:var(--lemon);--fg:var(--ink);position:relative;height:54px;border:0;background:var(--c);color:var(--fg);
   font:300 clamp(22px,3.3vw,30px)/1 var(--font);letter-spacing:-.01em;display:inline-flex;align-items:center;gap:10px;
@@ -119,17 +120,23 @@ body{background:#121212;color:var(--cream);font-family:var(--font);font-weight:3
 .cancel svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:1.3}
 .cancel:hover,.cancel:focus-visible{background:var(--cream);color:var(--ink);border-radius:0}
 .cancel[hidden]{display:none}
+/* when the line has no room on the right, the circle stays a circle and its label hangs just below it */
+.go.compact,.go.compact.armed,.go.compact.run{padding:0 13px;gap:0}
+.go.compact .nm{max-width:0!important}
+.gobelow{position:absolute;right:0;top:54px;padding-top:8px;z-index:5;display:flex;flex-direction:column;align-items:flex-end;gap:8px}
+.gobelow[hidden]{display:none}
+.gotag{--c:var(--violet);--fg:#fff;height:44px;font-size:20px;padding:0 20px;animation:drop .4s var(--spring) both}
 .go.run:hover svg,.go.run:focus-visible svg{transform:none}
 
 
-.read{position:absolute;left:clamp(20px,5vw,64px);right:clamp(20px,5vw,64px);bottom:28px;font-size:14px;color:var(--muted)}
+.read{position:absolute;left:clamp(20px,5vw,44px);right:clamp(20px,5vw,44px);bottom:28px;font-size:14px;color:var(--muted)}
 
 /* spec */
 .stage,.spec{box-sizing:border-box}
 .specwrap{width:min(900px,100%);margin:0 auto 24px;display:flex;flex-direction:column;align-items:flex-start;gap:12px}
 .specbtn{font:300 15px var(--font);color:var(--cream);background:none;border:1px solid var(--cream);border-radius:999px;padding:8px 18px;cursor:pointer}
 .specbtn[aria-expanded="true"]{background:var(--cream);color:var(--ink);border-radius:0}
-.spec{width:100%;background:var(--ground);padding:36px clamp(20px,5vw,64px);display:flex;flex-direction:column;gap:34px;font-size:15px;line-height:1.5}
+.spec{width:100%;background:var(--ground);padding:36px clamp(20px,5vw,44px);display:flex;flex-direction:column;gap:34px;font-size:15px;line-height:1.5}
 .spec[hidden]{display:none}
 .spec h3{margin:0 0 12px;font-weight:400;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
 .spec ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px;max-width:68ch}
@@ -161,15 +168,15 @@ body{background:#121212;color:var(--cream);font-family:var(--font);font-weight:3
     <span class="word">I want to</span>
     <span class="slot" data-k="act"></span>
     <span class="word">for</span>
-    <span class="slot" data-k="focus"></span><span class="word" style="margin-left:-10px">,</span>
+    <span class="slot" data-k="focus"><span class="cm">,</span></span>
     <span class="word">then</span>
     <span class="slot" data-k="rest"></span>
     <span class="word">for</span>
-    <span class="slot" data-k="brk"></span><span class="word" style="margin-left:-10px">,</span>
-    <span class="tail">
+    <span class="slot" data-k="brk"><span class="cm">,</span></span>
     <span class="word">with</span>
+    <span class="tail">
     <span class="slot" data-k="sound"></span>
-    <span class="slot"><button class="sh go" id="go" aria-label="Start this plan"><svg viewBox="0 0 28 28"><path class="ar" d="M4 14h20M16 6l8 8-8 8"/><path class="st" d="M11 7v14M17 7v14"/></svg><span class="nm" id="goLbl">Start</span></button><button class="sh cancel" id="cancel" hidden><svg viewBox="0 0 28 28"><path d="M8 8l12 12M20 8 8 20"/></svg><span>Cancel</span></button></span>
+    <span class="slot"><button class="sh go" id="go" aria-label="Start this plan"><svg viewBox="0 0 28 28"><path class="ar" d="M4 14h20M16 6l8 8-8 8"/><path class="st" d="M11 7v14M17 7v14"/></svg><span class="nm" id="goLbl">Start</span></button><span class="gobelow" id="gobelow" hidden><button class="sh gotag" id="gotag" tabindex="-1"></button></span><button class="sh cancel" id="cancel" hidden><svg viewBox="0 0 28 28"><path d="M8 8l12 12M20 8 8 20"/></svg><span>Cancel</span></button></span>
     </span>
   </div>
     <div class="read" id="read">Tap a colored word, or press A F B T S. Enter starts.</div>
@@ -182,7 +189,7 @@ body{background:#121212;color:var(--cream);font-family:var(--font);font-weight:3
       <h3>Rules</h3>
       <ul>
         <li><b>One sentence is the menu.</b> White words are fixed; each colored word is a trigger that drops its own list.</li>
-        <li><b>Length is time.</b> Both time words share one scale: width grows from 130&thinsp;px to a fixed 260&thinsp;px cap at 60 min, so 30 min sits halfway. Time moves in 5-minute steps.</li>
+        <li><b>Length is time.</b> Both time words share one scale: width grows from 125&thinsp;px to a fixed 230&thinsp;px cap at 60 min, so 30 min sits halfway. Time moves in 5-minute steps.</li>
         <li><b>Square corners mean selected.</b> Hover squares an option as a preview; the open trigger flattens its bottom so the list hangs from it.</li>
         <li><b>Color is category.</b> Each word has its own color; in sound, blue is nature, green is scene, lilac picks directly.</li>
         <li><b>Solid and line alternate.</b> Icons inside one list switch between a solid shape and a thin line, like the reference.</li>
@@ -270,7 +277,7 @@ const G={
 const M={
   act:{c:'--lemon',sel:'code',opts:[['read','read'],['write','write'],['draw','draw'],['code','code'],['study','study']]},
   focus:{c:'--lilac',sel:45,timed:true,opts:[[15,'15 min'],[30,'30 min'],[45,'45 min'],[60,'60 min']]},
-  rest:{c:'--tang',sel:'walk',opts:[['walk','take a walk'],['stretch','stretch'],['snack','grab a snack'],['nap','nap']]},
+  rest:{c:'--tang',sel:'stretch',opts:[['walk','take a walk'],['stretch','stretch'],['snack','grab a snack'],['nap','nap']]},
   brk:{c:'--amber',sel:10,timed:true,opts:[[5,'5 min'],[10,'10 min'],[15,'15 min'],[20,'20 min']]},
   sound:{c:'--cobalt',fg:'#fff',sel:'rain',
     opts:[['rain','rain'],['ocean','ocean waves'],['cafe','café'],['library','library'],['noise','white noise'],['none','silence'],['birds','birds'],['thunder','thunder'],['train','train'],['fire','fireplace']],
@@ -285,10 +292,10 @@ const KEY={act:'A',focus:'F',rest:'B',brk:'T',sound:'S'};
 const CC={nature:'--cobalt',scene:'--green'};
 const SC={rain:'--cobalt',ocean:'--cobalt',cafe:'--green',library:'--green',noise:'--lilac',none:'--lilac',birds:'--cobalt',thunder:'--cobalt',train:'--green',fire:'--green'};
 const colorOf=(k,v)=>k==='sound'?[SC[v],SC[v]==='--cobalt'?'#fff':'var(--ink)']:[M[k].c,M[k].fg||'var(--ink)'];
-let last={act:'write',focus:30,rest:'stretch',brk:5,sound:'cafe'};
+let last={act:'write',focus:30,rest:'walk',brk:5,sound:'cafe'};
 let u=3, open=null, running=null;
-/* one scale for both time words: 0 min = 130px (just fits the label), 60 min = 260px (fixed cap); the time words' shortcut shows in the hint line */
-const WMIN=140,WMAX=260;
+/* one scale for both time words: 0 min = 125px (just fits the label), 60 min = 230px (fixed cap) */
+const WMIN=125,WMAX=230;
 const W=m=>Math.round(WMIN+(Math.min(WMAX,($('#line')?.clientWidth||900)-20)-WMIN)*Math.min(m,60)/60);
 /* ruler: one tick per 5 min, a tall one every 15 */
 const ticks=m=>Array.from({length:Math.ceil(m/5)},(_,i)=>`<i${(i+1)%3===0?' class="q"':''}></i>`).join('');
@@ -318,12 +325,20 @@ function makeTrig(slot){
   b.addEventListener('mouseenter',hint);b.addEventListener('focus',hint);b.addEventListener('mouseleave',back);b.addEventListener('blur',back);
   b.onclick=e=>{e.stopPropagation();toggle(k)};
   const L=document.createElement('div');L.className='list';L.setAttribute('role','menu');L.hidden=true;L.onclick=e=>e.stopPropagation();
-  slot.append(b,L);render(k,false);
+  slot.prepend(b);slot.append(L);render(k,false);
 }
-/* the start slot reserves the width of its open label, so the line wraps for it and hover always grows rightward */
-function reserveGo(){const go=$('#go'),slot=go.parentElement,was=go.classList.contains('armed');
-  const nm=go.querySelector('.nm');go.style.transition=nm.style.transition='none';go.classList.add('armed');
-  const w=go.offsetWidth;if(!was)go.classList.remove('armed');void go.offsetWidth;go.style.transition=nm.style.transition='';slot.style.width=w+'px'}
+/* start label: grows to the right when the line has room, otherwise hangs below the circle */
+function setLbl(t){$('#goLbl').textContent=t;placeGo()}
+function placeGo(){const go=$('#go'),slot=go.parentElement;if(!slot.classList.contains('goslot'))return;
+  const nm=go.querySelector('.nm');
+  const need=nm.scrollWidth+80+($('#cancel').hidden?0:180);
+  const room=$('#stage').getBoundingClientRect().right-48-slot.getBoundingClientRect().left;
+  const compact=room<need;go.classList.toggle('compact',compact);
+  const show=compact&&(go.classList.contains('armed')||!!running);
+  $('#gobelow').hidden=!show;$('#gotag').textContent=nm.textContent;
+  const c=$('#cancel');if(!c.hidden){
+    if(compact){if(c.parentElement!==$('#gobelow'))$('#gobelow').appendChild(c);c.style.position='static';c.style.height='44px';c.style.fontSize='20px'}
+    else{if(c.parentElement!==slot)slot.appendChild(c);c.style.position='';c.style.top='0';c.style.left=(go.offsetWidth+10)+'px';c.style.height='';c.style.fontSize=''}}}
 function render(k,animate=true){
   const b=$(`.slot[data-k="${k}"] .trig`),d=M[k];
   if(d.timed)b.style.width=W(d.sel)+'px';
@@ -331,7 +346,7 @@ function render(k,animate=true){
   if(k==='sound'){const [cc,fg]=colorOf(k,d.sel);b.style.setProperty('--c',`var(${cc})`);b.style.setProperty('--fg',fg)}
   const txt=label(k,d.sel);
   animate?typeTo(b,txt):b.querySelector('.t').textContent=txt;
-  if(!running){$('#goLbl').textContent=`Start · ${M.focus.sel+M.brk.sel} min`;if($('#go').parentElement.classList.contains('goslot'))reserveGo()}
+  if(!running){setLbl(`Start · ${M.focus.sel+M.brk.sel} min`)}
 }
 function toggle(k){if(running)return;open===k?close():openList(k)}
 function item(k,v,i,d){
@@ -418,11 +433,9 @@ function tick(){const c=RS.cur;
     begin()}}
 const minsLeft=()=>Math.ceil(RS.cur.left)+(RS.i===0?M.brk.sel:0);
 function resume(){running=setInterval(tick,100);$('#go').classList.remove('paused');$('#cancel').hidden=true;
-  $('#goLbl').textContent='Pause';$('#read').textContent='Demo speed: one second is one minute.'}
+  setLbl('Pause');$('#read').textContent='Demo speed: one second is one minute.'}
 function pause(){clearInterval(running);running='paused';$('#go').classList.add('paused');
-  $('#goLbl').textContent=`Continue · ${minsLeft()} min left`;
-  const c=$('#cancel'),go=$('#go');c.hidden=false;
-  if(go.classList.contains('flip')){c.style.left='auto';c.style.right=(go.offsetWidth+10)+'px'}else{c.style.right='auto';c.style.left=(go.offsetWidth+10)+'px'}
+  $('#cancel').hidden=false;setLbl(`Continue · ${minsLeft()} min left`);
   $('#read').textContent='Paused. Continue where you left off, or cancel the plan.'}
 $('#go').onclick=e=>{e.stopPropagation();close();
   if(running==='paused')return resume();
@@ -433,25 +446,27 @@ $('#go').onclick=e=>{e.stopPropagation();close();
 };
 $('#cancel').onclick=e=>{e.stopPropagation();stop()};
 /* a finished half of the sentence folds away; the rest slides forward */
-const CLAUSE=[[0,1,2,3,4,5],[6,7,8,9]];
+const CLAUSE=[[0,1,2,3,4],[5,6,7]];   /* commas live inside their time slot, so they never wrap alone */
 function collapse(n){const kids=[...$('#line').children];
   CLAUSE[n].forEach(j=>{const el=kids[j];el.style.maxWidth=el.offsetWidth+'px';void el.offsetWidth;el.classList.add('done');
     setTimeout(()=>{if(el.classList.contains('done'))el.hidden=true},520)})}
-function stop(){clearInterval(running);running=null;RS=null;$('#go').classList.remove('run','armed','paused');$('#cancel').hidden=true;
+function stop(){clearInterval(running);running=null;RS=null;$('#go').classList.remove('run','armed','paused');$('#cancel').hidden=true;$('#gobelow').hidden=true;
   [...$('#line').children].forEach(el=>{el.hidden=false;el.classList.remove('done');el.style.maxWidth=''});
   $('#stage').classList.remove('running');$$('.slot').forEach(s=>s.classList.remove('active'));
   $$('.trig').forEach(b=>b.classList.remove('gone','ticking'));
   render('focus');render('brk');$('#read').textContent=IDLE}
 
-function scale(){
+function scale(){placeGo();
   ['focus','brk'].forEach(k=>$(`.slot[data-k="${k}"] .trig`).style.width=W(M[k].sel)+'px')}
 $$('.slot[data-k]').forEach(makeTrig);
 /* start: one circle in the sentence; on hover the label grows over the page, away from the edge, without moving anything */
-{const go=$('#go');go.parentElement.classList.add('goslot');reserveGo();
+{const go=$('#go');go.parentElement.classList.add('goslot');
   const grow=()=>{go.classList.remove('flip');go.classList.add('armed')};
-  const shrink=()=>{if(!running)go.classList.remove('armed')};
-  go.addEventListener('mouseenter',grow);go.addEventListener('focus',grow);
-  go.addEventListener('mouseleave',shrink);go.addEventListener('blur',shrink);}
+  const shrink=()=>{if(!running)go.classList.remove('armed');placeGo()};
+  const slot=go.parentElement;
+  slot.addEventListener('mouseenter',()=>{grow();placeGo()});go.addEventListener('focus',()=>{grow();placeGo()});
+  slot.addEventListener('mouseleave',shrink);go.addEventListener('blur',shrink);
+  $('#gotag').onclick=e=>{e.stopPropagation();go.click()};}
 /* spec: fill in icons and toggle */
 $('#spec').innerHTML=$('#spec').innerHTML.replace(/__S\{G\.(\w+)\}/g,(_,n)=>G[n]);
 $('#specBtn').onclick=e=>{e.stopPropagation();const o=$('#spec').hidden;$('#spec').hidden=!o;$('#specBtn').setAttribute('aria-expanded',o);
