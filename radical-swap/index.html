@@ -69,7 +69,13 @@ body{margin:0;background:var(--ground);color:var(--ink);font:400 14px/1.45 var(-
 #trigger .more{margin-left:auto;display:flex;align-items:center;color:var(--ink-2);transition:color .15s}
 #trigger .more svg{width:13px;height:13px;transition:transform .2s}
 #trigger:hover .more{color:var(--ink)}
-#trigger[aria-expanded="true"]{border-bottom-color:var(--red)}
+#trigger{position:relative}
+#trigger::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:1.5px;background:var(--red);transform:scaleX(0);transform-origin:left;transition:transform .45s cubic-bezier(.3,.8,.3,1)}
+#trigger[aria-expanded="true"]::after{transform:scaleX(1)}
+.anim.pv{stroke:var(--red)}
+.st.hideW{opacity:0}
+.order button{transition:transform .2s cubic-bezier(.3,1.4,.5,1)}
+.order button:hover{transform:translateY(-3px)}
 #trigger[aria-expanded="true"] .tl,#trigger[aria-expanded="true"] .more{color:var(--red)}
 #trigger[aria-expanded="true"] .more svg{transform:rotate(180deg)}
 #trigger:focus-visible{outline:2px solid var(--red);outline-offset:4px}
@@ -111,8 +117,15 @@ body{margin:0;background:var(--ground);color:var(--ink);font:400 14px/1.45 var(-
 /* ---------- MENU SYSTEM: set into the column ---------- */
 .col.open .desc,.col.open .also{display:none}
 .menu{margin-top:2px}
-.page{animation:rows .24s ease-out}
-@keyframes rows{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.page>*{will-change:clip-path}
+.page.wr>*{animation:wr .44s cubic-bezier(.25,.8,.25,1) both;animation-delay:calc(var(--i,0)*40ms)}
+.page.wl>*{animation:wl .44s cubic-bezier(.25,.8,.25,1) both;animation-delay:calc(var(--i,0)*40ms)}
+.page.er>*{animation:er .22s cubic-bezier(.55,0,.8,.3) both;animation-delay:calc(var(--i,0)*18ms)}
+.page.el>*{animation:el .22s cubic-bezier(.55,0,.8,.3) both;animation-delay:calc(var(--i,0)*18ms)}
+@keyframes wr{from{clip-path:inset(-2px 100% -2px 0)}to{clip-path:inset(-2px 0 -2px 0)}}
+@keyframes wl{from{clip-path:inset(-2px 0 -2px 100%)}to{clip-path:inset(-2px 0 -2px 0)}}
+@keyframes er{from{clip-path:inset(-2px 0 -2px 0)}to{clip-path:inset(-2px 0 -2px 100%)}}
+@keyframes el{from{clip-path:inset(-2px 0 -2px 0)}to{clip-path:inset(-2px 100% -2px 0)}}
 .sec{display:flex;justify-content:space-between;padding:16px 0 6px;font-size:12.5px;color:var(--ink-2)}
 .divider{height:0;margin:4px 0}
 .back{display:flex;align-items:baseline;gap:8px;width:100%;padding:14px 0 8px;border:0;background:none;font:500 14px var(--ui);color:var(--ink);cursor:pointer;text-align:left}
@@ -140,10 +153,13 @@ body{margin:0;background:var(--ground);color:var(--ink);font:400 14px/1.45 var(-
 .item.on .switch{color:var(--red)}
 .item.on .switch::after{content:"On"}
 /* states */
-.item:hover{border-bottom-color:var(--ink)}
+.item::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:1.5px;background:var(--ink);transform:scaleX(0);transform-origin:left;transition:transform .3s cubic-bezier(.3,.8,.3,1),background-color .12s,height .12s}
+.item:hover::after{transform:scaleX(1)}
+.item.pressed::after{transform:scaleX(1);background:var(--red);height:2px;transition-duration:.12s}
+.item[aria-disabled="true"]::after{display:none}
 .item:hover .label{transform:translateX(4px)}
 .item:hover .lead.icon{color:var(--ink)}
-.item.pressed{color:var(--red);border-bottom-color:var(--red)}
+.item.pressed{color:var(--red)}
 .item.pressed .lead.icon,.item.pressed .key,.item.pressed .chev{color:var(--red)}
 .item.pressed .label{transform:translateX(8px)}
 .item[aria-disabled="true"]{color:var(--ink-3);cursor:default}
@@ -247,8 +263,18 @@ function paint(){
   document.querySelectorAll('#order button').forEach((b,i)=>b.classList.toggle('on',f.level==='stroke'&&f.stroke===i));
   renderFocus();
 }
-function preview(c,pos){if(!layerB)return;if(!c){layerB.style.opacity=0;layerA.style.opacity=1;paint();return}
-  fill(layerB,c,i=>partOf(c,i)===pos?'new':'');glyph.classList.remove('dim');layerB.style.opacity=1;layerA.style.opacity=0;$('over').innerHTML=''}
+let pvTok=0,pvChar=null;
+function preview(c,pos){if(!layerB)return;const tok=++pvTok;
+  if(!c){pvChar=null;layerB.style.opacity=0;layerA.style.opacity=1;paint();return}
+  if(pvChar===c+pos)return;pvChar=c+pos;
+  const isNew=i=>pos!=null&&pos>=0&&partOf(c,i)===pos;
+  const els=fill(layerB,c,i=>isNew(i)?'new hideW':'');glyph.classList.remove('dim');layerB.style.opacity=1;layerA.style.opacity=0;$('over').innerHTML='';
+  const ink=el('g');layerB.append(ink);
+  CH[c].s.forEach((d,i)=>{if(!isNew(i))return;const id=`pv${tok}_${i}`,cp=el('clipPath',{id});cp.append(el('path',{d}));ink.append(cp);
+    const m=CH[c].m[i],pl=el('polyline',{class:'anim pv','clip-path':`url(#${id})`,points:m.map(([a,b])=>`${a},${b}`).join(' ')});ink.append(pl);
+    const len=m.reduce((s,q,k)=>k?s+Math.hypot(q[0]-m[k-1][0],q[1]-m[k-1][1]):0,0)+128;pl.style.strokeDasharray=len;pl.style.strokeDashoffset=len;pl.getBoundingClientRect();
+    pl.style.transition=`stroke-dashoffset .42s cubic-bezier(.4,.1,.3,1) ${CH[c].i[pos].indexOf(i)*60}ms`;pl.style.strokeDashoffset=0});
+  setTimeout(()=>{if(tok!==pvTok)return;els.forEach(e=>e.classList.remove('hideW'));ink.remove()},620)}
 function go(c,pos){preview(null);cur=c;history.push(c);pulled.clear();pin=pos!=null?{level:'part',part:pos}:{level:'char'};hov=null;buildGlyph();if(pos!=null)CH[c].i[pos].forEach(i=>strokeEls[i].classList.add('flash'));renderAll()}
 async function write(idx){
   if(writing)return;writing=true;closeMenu();const layer=el('g');layerA.append(layer);idx.forEach(i=>strokeEls[i].style.opacity=0);
@@ -361,13 +387,21 @@ function page(items,sub){const p=document.createElement('div');p.className='page
     const b=document.createElement('button');b.type='button';b.className='item';b.setAttribute('role','menuitem');b._it=it;b.innerHTML=itemHTML(it);if(it.disabled)b.setAttribute('aria-disabled','true');p.append(b)}
   return p}
 function sync(){menu?.querySelectorAll('.item').forEach(b=>{if(b._it.sw)b.classList.toggle('on',b._it.sw())})}
+function stagger(p,cls,rev){const kids=[...p.children];kids.forEach((k,i)=>k.style.setProperty('--i',rev?kids.length-1-i:i));
+  p.classList.remove('wr','wl','er','el');void p.offsetWidth;p.classList.add(cls);return(cls[0]==='w'?440+kids.length*40:220+kids.length*18)}
 function openMenu(){closeMenu(true);hov=null;menu=document.createElement('div');menu.className='menu';menu.setAttribute('role','menu');
-  const t=$('trigger');stack=[page(itemsFor(pin))];menu.append(stack[0]);t.after(menu);$('col').classList.add('open');wire(menu);sync();
+  const t=$('trigger');stack=[page(itemsFor(pin))];menu.append(stack[0]);t.after(menu);$('col').classList.add('open');wire(menu);sync();stagger(stack[0],'wr');
   t.setAttribute('aria-expanded','true');paint()}
 function reopen(){if(menu)openMenu()}
-function push(sub){const old=stack[stack.length-1],p=page(sub.items(),sub);old.hidden=true;menu.append(p);stack.push(p)}
-function pop(){if(stack.length<2)return;stack.pop().remove();preview(null);const p=stack[stack.length-1];p.hidden=false;p.style.animation='none';p.offsetHeight;p.style.animation=''}
-function closeMenu(silent){$('col').classList.remove('open');if(menu){menu.remove();menu=null;stack=[]}$('trigger').setAttribute('aria-expanded','false');if(!silent)preview(null)}
+let busy=false;
+function push(sub){if(busy)return;busy=true;const m=menu,old=stack[stack.length-1],p=page(sub.items(),sub);const t=stagger(old,'er');
+  setTimeout(()=>{busy=false;if(menu!==m)return;old.hidden=true;menu.append(p);stack.push(p);stagger(p,'wr')},t)}
+function pop(){if(stack.length<2||busy)return;busy=true;const m=menu,top=stack.pop();preview(null);const t=stagger(top,'el',true);
+  setTimeout(()=>{busy=false;top.remove();if(menu!==m)return;const p=stack[stack.length-1];p.hidden=false;stagger(p,'wl')},t)}
+function closeMenu(silent){const m=menu,top=stack[stack.length-1];menu=null;stack=[];busy=false;$('trigger').setAttribute('aria-expanded','false');
+  if(!m){$('col').classList.remove('open');return}
+  if(silent){m.remove();$('col').classList.remove('open');return}
+  preview(null);const t=stagger(top,'el',true);setTimeout(()=>{m.remove();if(!menu){$('col').classList.remove('open');paint()}},t)}
 function wire(m){
   m.addEventListener('pointerover',e=>{const b=e.target.closest('.item');if(!b||b._it.disabled)return;if(b._it.alt)preview(b._it.alt,b._it.pos);else if(layerB.style.opacity==='1')preview(null)});
   m.addEventListener('pointerleave',()=>{if(layerB.style.opacity==='1')preview(null)});
@@ -409,12 +443,12 @@ addEventListener('resize',fit);
 /* ================= spec ================= */
 $('spec').innerHTML=`<div class="tables"><div>
 <h3>Trigger</h3><table><tr><td>Row</td><td>full column · padding 0 0 12 · rule 1 #1C1C1A</td></tr><tr><td>Label</td><td>SF Pro 15 / 500 · target 15 #85837D</td></tr><tr><td>Caret</td><td>13 · open: Close, #C8432C, caret 180°</td></tr></table>
-<h3>Container</h3><table><tr><td>Width</td><td>column (284)</td></tr><tr><td>Fill · shadow</td><td>none · set into the column</td></tr><tr><td>Open</td><td>note and related characters step aside · rows rise 4px · 240ms</td></tr><tr><td>Submenu</td><td>replaces the rows · back row with ← and count</td></tr></table>
+<h3>Container</h3><table><tr><td>Width</td><td>column (284)</td></tr><tr><td>Fill · shadow</td><td>none · set into the column</td></tr><tr><td>Open</td><td>rows are written left → right like a 横 · clip reveal 440ms · 40ms apart</td></tr><tr><td>Close</td><td>rows are erased right → left, last row first · 220ms · 18ms apart</td></tr><tr><td>Submenu</td><td>forward: old rows erased, new rows written left → right · back: right → left</td></tr><tr><td>Trigger line</td><td>draws red left → right · 450ms</td></tr></table>
 <h3>Section</h3><table><tr><td>Label</td><td>12.5 · #85837D · sentence case</td></tr><tr><td>Padding</td><td>16 0 6</td></tr></table>
 <h3>Practice sheet</h3><table><tr><td>Pinyin</td><td>four lines 440 × 84 · 50 · tap to hear</td></tr><tr><td>Grid</td><td>tian-zi 440 · dashed cross · #EFCFC7</td></tr><tr><td>Stroke order</td><td>44 boxes · gap 8 · newest stroke #C8432C</td></tr></table>
 </div><div>
 <h3>Item</h3><table><tr><td>Height</td><td>42 · rule 1 #DEDCD6 below</td></tr><tr><td>Gap</td><td>14</td></tr><tr><td>Label</td><td>SF Pro 15/20 · 汉字 PingFang 18</td></tr><tr><td>Lead</td><td>18 slot · icon 15 stroke 1.35 #B9B7B1 · or glyph</td></tr><tr><td>Shortcut</td><td>12 · #B9B7B1</td></tr><tr><td>Badge</td><td>13 / 500 · #C8432C</td></tr><tr><td>Right icon</td><td>chevron 11 · On / Off 12.5</td></tr></table>
-<h3>States</h3><table><tr><td>Default</td><td>rule #DEDCD6</td></tr><tr><td>Hover</td><td>rule turns #1C1C1A · label moves 4px · a new character previews on the grid</td></tr><tr><td>Pressed</td><td>text and rule #C8432C · label moves 8px</td></tr><tr><td>Disabled</td><td>#B9B7B1 · no movement</td></tr></table>
+<h3>States</h3><table><tr><td>Default</td><td>rule #DEDCD6</td></tr><tr><td>Hover</td><td>an ink line is drawn along the rule, left → right, 300ms · label moves 4px · a swap writes the new part into the grid stroke by stroke (420ms, 60ms apart)</td></tr><tr><td>Pressed</td><td>line turns #C8432C, 2px · text red · label moves 8px</td></tr><tr><td>Disabled</td><td>#B9B7B1 · no movement</td></tr></table>
 <h3>Configurations</h3><table><tr><td>Single line</td><td>Write it</td></tr><tr><td>Left icon</td><td>every row</td></tr><tr><td>Shortcut</td><td>P · W · L · S · R · N · G</td></tr><tr><td>Badge</td><td>characters you can make</td></tr><tr><td>Right icon</td><td>chevron · On / Off</td></tr><tr><td>Sections</td><td>Practice · Swap a part · Explore</td></tr><tr><td>Submenu</td><td>Right 火 › 和 种 利 科 程 秒 积</td></tr></table>
 </div></div>`;
 
