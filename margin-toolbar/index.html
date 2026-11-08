@@ -123,7 +123,7 @@ svg.ink path.pencil{opacity:.72}
 @keyframes in{from{opacity:0;filter:blur(3px);transform:translateY(4px)}}
 
 /* the toolbar: two rows, the white sheet marks the tool in hand */
-.tb{position:absolute;left:0;top:0;z-index:4;display:flex;flex-direction:column;align-items:center;padding:7px;border-radius:26px;background:var(--paper);box-shadow:0 1px 2px rgba(60,50,30,.06),0 18px 40px rgba(60,50,30,.16);cursor:grab;transition:left .6s var(--calm),top .6s var(--calm),box-shadow .4s var(--calm)}
+.tb{position:absolute;left:0;top:0;z-index:4;display:flex;flex-direction:column;align-items:center;padding:9px;border-radius:28px;background:var(--paper);box-shadow:0 1px 2px rgba(60,50,30,.06),0 18px 40px rgba(60,50,30,.16);cursor:grab;transition:left .6s var(--calm),top .6s var(--calm),box-shadow .4s var(--calm)}
 .tb.drag{transition:none;cursor:grabbing;box-shadow:0 1px 2px rgba(60,50,30,.06),0 30px 60px rgba(60,50,30,.26)}
 .tb.sizing{overflow:hidden;transition:none}
 .tb.settle{overflow:hidden;transition:left .6s var(--calm),top .6s var(--calm),width .5s var(--calm),height .5s var(--calm)}
@@ -232,6 +232,20 @@ svg.g{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-widt
 .ring.closing .sheet,.ring.closing .ic{opacity:0;transition:opacity .22s var(--calm) .06s}
 .chip{position:absolute;z-index:5;font:400 13px/1 var(--f);color:var(--ink);background:#fff;border-radius:13px;padding:9px 12px;box-shadow:0 1px 2px rgba(60,50,30,.06),0 10px 24px rgba(60,50,30,.12);pointer-events:none;transform:translate(14px,-150%);animation:chip .8s var(--calm) forwards}
 @keyframes chip{0%{opacity:0;filter:blur(3px)}20%,70%{opacity:1;filter:none}100%{opacity:0}}
+/* demo layer: the mouse is shown as an Apple Pencil, and each Pencil gesture is captioned */
+.pencil{position:absolute;left:0;top:0;z-index:9;pointer-events:none;opacity:0;transition:opacity .25s var(--calm)}
+.pencil.on{opacity:1}
+.pencil svg{position:absolute;left:-4px;top:-40px;overflow:visible;transform-origin:4px 40px;transform:rotate(36deg)}
+.pencil .shadow{transform:translate(10px,16px);transition:transform .18s var(--calm)}
+.pencil.down .shadow{transform:translate(2px,4px)}
+.pencil .body{transition:transform .18s var(--calm)}
+.pencil.down .body{transform:translateX(1.5px)}
+body.pencil-on .screen,body.pencil-on .screen *{cursor:none!important}
+.gest{position:absolute;left:50%;bottom:22px;z-index:10;display:flex;align-items:center;gap:8px;padding:10px 16px 10px 13px;border-radius:14px;background:rgba(30,28,25,.84);color:#fff;font:400 13.5px/1 var(--f);white-space:nowrap;pointer-events:none;opacity:0;transform:translate(-50%,8px);transition:opacity .35s var(--calm),transform .45s var(--calm)}
+.gest.on{opacity:1;transform:translate(-50%,0)}
+.gest svg{width:16px;height:16px;fill:none;stroke:#fff;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round}
+.gest b{font-weight:500}
+.gest span{opacity:.6}
 .hint{display:none;position:absolute;left:28px;bottom:18px;z-index:3;font:400 12px/1.4 var(--f);color:var(--soft);pointer-events:none}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style></head>
@@ -263,6 +277,14 @@ svg.g{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-widt
         <svg class="ink" id="ink"></svg>
       </article></div><button class="turn prev" id="prev" aria-label="Previous page"><svg viewBox="0 0 24 24"><path d="M14.5 6l-6 6 6 6"/></svg></button><button class="turn next" id="next" aria-label="Next page"><svg viewBox="0 0 24 24"><path d="M9.5 6l6 6-6 6"/></svg></button></div></div>
       <span class="hint" id="hint">Pen</span>
+      <div class="pencil" id="pencil" aria-hidden="true"><svg viewBox="-4 -40 600 80" width="600" height="80">
+        <defs><linearGradient id="pb" x1="0" y1="-9" x2="0" y2="9" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#ffffff"/><stop offset=".55" stop-color="#f4f3f0"/><stop offset="1" stop-color="#dcd9d3"/></linearGradient>
+        <linearGradient id="pt" x1="0" y1="-7" x2="0" y2="7" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#fbfaf8"/><stop offset="1" stop-color="#d9d6cf"/></linearGradient>
+        <filter id="ps" x="-10%" y="-200%" width="120%" height="500%"><feGaussianBlur stdDeviation="5"/></filter></defs>
+        <g class="shadow"><path d="M0 0L34 -7H586a9 9 0 0 1 0 18H34Z" fill="rgba(40,35,25,.22)" filter="url(#ps)"/></g>
+        <g class="body"><path d="M34 -9H586a9 9 0 0 1 0 18H34Z" fill="url(#pb)"/><path d="M34 5.5H595v3.5H34Z" fill="rgba(60,55,45,.06)"/><path d="M0 0L34 -9V9Z" fill="url(#pt)"/><path d="M0 0L5 -1.4V1.4Z" fill="#9c978d"/><path d="M34 -9V9" stroke="rgba(60,55,45,.12)" stroke-width=".8"/></g>
+      </svg></div>
+      <div class="gest" id="gest"></div>
     </div></div>
   </div>
   <div class="specwrap">
@@ -424,7 +446,7 @@ addEventListener('pointermove',e=>{if(!gesture)return;const sp=local(e,screen),g
   if(!dragged){dragged=true;tb.classList.add('drag');tb.setPointerCapture(e.pointerId)}
   setSide(sideFor(sp.x,sp.y));
   // pushing on into the edge it is already docked to: keep only the options
-  if(st.size!=='ring'){const W=1194,H=834,dEdge={top:sp.y,bottom:H-sp.y,left:sp.x,right:W-sp.x}[st.side];const sz=st.side!=='float'&&dEdge<26?'sub':g.size0;
+  if(st.size!=='ring'){const W=1194,H=834,w=tb.offsetWidth,h=tb.offsetHeight,over={top:-(sp.y-g.fy*h),bottom:sp.y+(1-g.fy)*h-H,left:-(sp.x-g.fx*w),right:sp.x+(1-g.fx)*w-W}[st.side];const sz=st.side!=='float'&&over>-6?'sub':g.size0;
     if(tb.dataset.size!==sz){tb.dataset.size=sz;st.size=sz;placeInd(true);g.fx=Math.min(g.fx,.9);g.fy=Math.min(g.fy,.9)}}
   tb.style.left=(sp.x-g.fx*tb.offsetWidth)+'px';tb.style.top=(sp.y-g.fy*tb.offsetHeight)+'px';
   const r=zoneRect(st.side,sp.x,sp.y);Object.assign(zone.style,{left:r[0]+'px',top:r[1]+'px',width:r[2]+'px',height:r[3]+'px',borderRadius:(st.side==='float'?70:28)+'px'});zone.classList.add('on')});
@@ -553,18 +575,28 @@ function moveRing(p){const g=ring,dx=p.x-g.c.x,dy=p.y-g.c.y,dist=Math.hypot(dx,d
   g.L.querySelectorAll('.ic').forEach(e=>e.classList.toggle('aim',e.dataset.d===g.aim));
   const nm=g.L.querySelector('.nm');if(g.aim){const a=rad(ANG[g.aim]),r=R+12+10;nm.textContent=NAMES[MAP[g.aim]];nm.style.left=Math.cos(a)*r+'px';nm.style.top=Math.sin(a)*r+'px';nm.style.transform={up:'translate(-50%,-100%)',down:'translate(-50%,0)',left:'translate(-100%,-50%)',right:'translate(0,-50%)'}[g.aim];nm.classList.add('on')}else nm.classList.remove('on')}
 function ringStep(){if(!ring||!ring.s.init)return;const s=ring.s,fw=s.t1>s.a1,bw=s.t0<s.a0;s.a1+=(s.t1-s.a1)*(fw?.24:.12);s.a0+=(s.t0-s.a0)*(bw?.24:.12);ring.L.querySelector('.sheet').setAttribute('d',arcD(s.a0,Math.max(s.a1,s.a0+.01)))}
-function closeRing(instant){if(!ring)return;const g=ring;ring=null;if(g.aim&&!instant)setTool(MAP[g.aim]);
+function closeRing(instant){if(!ring)return;const g=ring;ring=null;if(g.aim&&!instant){setTool(MAP[g.aim]);gest(gestFrom||'Hold, then slide','→ '+NAMES[MAP[g.aim]])}
   g.L.classList.add('closing');setTimeout(()=>g.L.remove(),instant?0:320)}
 function chip(p,t){const c=document.createElement('div');c.className='chip';c.textContent=t;c.style.left=p.x+'px';c.style.top=p.y+'px';screen.append(c);setTimeout(()=>c.remove(),1400)}
 
+/* ---- demo layer ---- */
+const pencilEl=$('#pencil'),gestEl=$('#gest');let gestT=null,gestFrom='';
+const PENCIL_IC='<svg viewBox="0 0 24 24"><path d="M4 20l2.5-.6L19 6.9a1.5 1.5 0 0 0 0-2.1l-.8-.8a1.5 1.5 0 0 0-2.1 0L3.6 16.5z"/></svg>';
+function gest(name,detail){clearTimeout(gestT);gestEl.innerHTML=`${PENCIL_IC}<b>${name}</b>${detail?`<span>${detail}</span>`:''}`;gestEl.classList.add('on');gestT=setTimeout(()=>gestEl.classList.remove('on'),1600)}
+document.body.classList.add('pencil-on');
+addEventListener('pointermove',e=>{if(e.pointerType!=='mouse')return;const r=screen.getBoundingClientRect(),inside=e.clientX>r.left&&e.clientX<r.right&&e.clientY>r.top&&e.clientY<r.bottom;
+  pencilEl.classList.toggle('on',inside);if(inside){const p=local(e,screen);pencilEl.style.transform=`translate(${p.x}px,${p.y}px)`}},{passive:true});
+addEventListener('pointerdown',e=>{if(e.pointerType==='mouse')pencilEl.classList.add('down')});
+addEventListener('pointerup',()=>pencilEl.classList.remove('down'));
+document.addEventListener('mouseleave',()=>pencilEl.classList.remove('on'));
 /* ---- the Pencil on the page ---- */
 let act=null;
 scroll.addEventListener('contextmenu',e=>e.preventDefault());
 scroll.addEventListener('pointerdown',e=>{if(e.pointerType==='touch'||e.target.closest('.turn,.note'))return;e.preventDefault();scroll.setPointerCapture(e.pointerId);
   const sp=local(e,screen),dp=local(e,doc);resetAsk();
-  if(e.button===2){openRing(sp);act={kind:'ring'};return}
+  if(e.button===2){openRing(sp);act={kind:'ring'};gestFrom='Squeeze';gest('Squeeze','slide to a tool');return}
   act={kind:tool,start:sp,startD:dp,moved:false,pts:[dp],caret:caretAt(e.clientX,e.clientY),
-    hold:setTimeout(()=>{if(!act||act.moved)return;if(act.path)act.path.remove();CSS.highlights&&CSS.highlights.delete('preview');openRing(act.start);act={kind:'ring'}},240)};
+    hold:setTimeout(()=>{if(!act||act.moved)return;if(act.path)act.path.remove();CSS.highlights&&CSS.highlights.delete('preview');openRing(act.start);act={kind:'ring'};gestFrom='Hold, then slide';gest('Hold, then slide','to a tool')},240)};
   if(tool==='er')eraseAt(e,dp)});
 scroll.addEventListener('pointermove',e=>{if(!act)return;const sp=local(e,screen),dp=local(e,doc);
   if(act.kind==='ring'){moveRing(sp);return}
@@ -581,7 +613,7 @@ function up(e){if(!act)return;const a=act;act=null;clearTimeout(a.hold);setTimeo
   if(a.kind==='cm'&&!a.moved)addNote(a.startD,a.caret)}
 scroll.addEventListener('pointerup',up);scroll.addEventListener('pointercancel',up);
 // Pencil double-tap: eraser and back
-addEventListener('keydown',e=>{if(e.key.toLowerCase()!=='d'||e.target.isContentEditable||e.target.closest('textarea'))return;const k=tool==='er'?(prevTool==='er'?'pen':prevTool):'er';setTool(k);const r=screen.getBoundingClientRect();chip({x:screen.clientWidth/2-40,y:120},NAMES[k])});
+addEventListener('keydown',e=>{if(e.key.toLowerCase()!=='d'||e.target.isContentEditable||e.target.closest('textarea'))return;const k=tool==='er'?(prevTool==='er'?'pen':prevTool):'er';setTool(k);gest('Double-tap','→ '+NAMES[k]);const r=screen.getBoundingClientRect();chip({x:screen.clientWidth/2-40,y:120},NAMES[k])});
 
 $('#specBtn').onclick=()=>{const o=$('#spec').hidden;$('#spec').hidden=!o;$('#specBtn').setAttribute('aria-expanded',o);if(o)$('#spec').scrollIntoView({behavior:'smooth',block:'start'})};
 setTool('pen');requestAnimationFrame(()=>{placeInd(true);place();paginate();seedNotes();seedSketches();playSketches()});
