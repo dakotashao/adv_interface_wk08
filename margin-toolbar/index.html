@@ -123,14 +123,14 @@ svg.ink path.pencil{opacity:.72}
 @keyframes in{from{opacity:0;filter:blur(3px);transform:translateY(4px)}}
 
 /* the toolbar: two rows, the white sheet marks the tool in hand */
-.tb{position:absolute;left:0;top:0;z-index:4;display:flex;flex-direction:column;align-items:center;padding:7px;border-radius:26px;background:rgba(241,240,237,.72);-webkit-backdrop-filter:blur(30px) saturate(1.5);backdrop-filter:blur(30px) saturate(1.5);box-shadow:0 1px 2px rgba(60,50,30,.06),0 18px 40px rgba(60,50,30,.16);cursor:grab;transition:left .6s var(--calm),top .6s var(--calm),box-shadow .4s var(--calm)}
+.tb{position:absolute;left:0;top:0;z-index:4;display:flex;flex-direction:column;align-items:center;padding:7px;border-radius:26px;background:var(--paper);box-shadow:0 1px 2px rgba(60,50,30,.06),0 18px 40px rgba(60,50,30,.16);cursor:grab;transition:left .6s var(--calm),top .6s var(--calm),box-shadow .4s var(--calm)}
 .tb.drag{transition:none;cursor:grabbing;box-shadow:0 1px 2px rgba(60,50,30,.06),0 30px 60px rgba(60,50,30,.26)}
 .tb.sizing{overflow:hidden;transition:none}
 .tb.settle{overflow:hidden;transition:left .6s var(--calm),top .6s var(--calm),width .5s var(--calm),height .5s var(--calm)}
 /* 2. when the Pencil works near or under the bar, the bar steps aside: it fades and lets the stroke through */
 .tb{transition:left .6s var(--calm),top .6s var(--calm),box-shadow .4s var(--calm),opacity .45s var(--calm)}
 .tb.ghost{opacity:.14;pointer-events:none}
-.ring .arc{stroke:rgba(241,240,237,.9)}
+
 /* where it sits decides its direction */
 .tb[data-side="bottom"]{flex-direction:column-reverse}
 .tb[data-side="left"]{flex-direction:row;align-items:flex-start}
